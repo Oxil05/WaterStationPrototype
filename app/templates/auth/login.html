@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | AquaFlow Station</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            background: #0a0e1a;
+            color: #e0e6f0;
+            overflow: hidden;
+        }
+
+        /* Left Branding Panel */
+        .brand-panel {
+            flex: 1;
+            background: linear-gradient(135deg, #0c1445 0%, #1a237e 30%, #0d47a1 60%, #01579b 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            padding: 3rem;
+        }
+
+        .brand-panel::before {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(66, 165, 245, 0.15) 0%, transparent 70%);
+            top: -100px;
+            right: -100px;
+            border-radius: 50%;
+            animation: pulse 6s ease-in-out infinite;
+        }
+
+        .brand-panel::after {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(0, 176, 255, 0.1) 0%, transparent 70%);
+            bottom: -50px;
+            left: -50px;
+            border-radius: 50%;
+            animation: pulse 8s ease-in-out infinite reverse;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 1; }
+        }
+
+        /* Floating water drops */
+        .water-drops {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .drop {
+            position: absolute;
+            background: rgba(66, 165, 245, 0.15);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            animation: float-up linear infinite;
+        }
+
+        .drop:nth-child(1) { width: 20px; height: 24px; left: 10%; animation-duration: 8s; animation-delay: 0s; }
+        .drop:nth-child(2) { width: 14px; height: 17px; left: 25%; animation-duration: 10s; animation-delay: 2s; }
+        .drop:nth-child(3) { width: 18px; height: 22px; left: 50%; animation-duration: 7s; animation-delay: 4s; }
+        .drop:nth-child(4) { width: 12px; height: 15px; left: 70%; animation-duration: 9s; animation-delay: 1s; }
+        .drop:nth-child(5) { width: 16px; height: 19px; left: 85%; animation-duration: 11s; animation-delay: 3s; }
+        .drop:nth-child(6) { width: 22px; height: 26px; left: 40%; animation-duration: 9s; animation-delay: 5s; }
+
+        @keyframes float-up {
+            0% { bottom: -30px; opacity: 0; transform: translateX(0) rotate(0deg); }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { bottom: 110%; opacity: 0; transform: translateX(30px) rotate(45deg); }
+        }
+
+        .brand-content { text-align: center; z-index: 1; }
+
+        .brand-icon {
+            font-size: 5rem;
+            color: #42a5f5;
+            margin-bottom: 1.5rem;
+            filter: drop-shadow(0 0 30px rgba(66, 165, 245, 0.4));
+            animation: dropBounce 3s ease-in-out infinite;
+        }
+
+        @keyframes dropBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .brand-name {
+            font-size: 3rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, #e3f2fd, #42a5f5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.75rem;
+        }
+
+        .brand-tagline {
+            font-size: 1.1rem;
+            color: rgba(224, 230, 240, 0.6);
+            font-weight: 300;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* Right Login Panel */
+        .login-panel {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            background: #0d1117;
+            position: relative;
+        }
+
+        .login-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 1px;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent, rgba(66, 165, 245, 0.3), transparent);
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-card h2 { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; color: #f0f4f8; }
+        .login-card p.subtitle { color: rgba(224, 230, 240, 0.5); margin-bottom: 2.5rem; font-size: 0.95rem; }
+
+        .form-group { margin-bottom: 1.5rem; position: relative; }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: rgba(224, 230, 240, 0.7);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .input-wrapper { position: relative; }
+        .input-wrapper i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(224, 230, 240, 0.3);
+            transition: color 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px 14px 46px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            color: #e0e6f0;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .form-input::placeholder { color: rgba(224, 230, 240, 0.25); }
+
+        .form-input:focus {
+            border-color: #42a5f5;
+            background: rgba(66, 165, 245, 0.05);
+            box-shadow: 0 0 0 4px rgba(66, 165, 245, 0.1);
+        }
+
+        .input-wrapper:focus-within i { color: #42a5f5; }
+
+        .form-options {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: rgba(224, 230, 240, 0.6);
+        }
+
+        .remember-me input[type="checkbox"] {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .remember-me input[type="checkbox"]:checked {
+            background: #42a5f5;
+            border-color: #42a5f5;
+        }
+
+        .remember-me input[type="checkbox"]:checked::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            font-size: 10px;
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #1565c0, #42a5f5);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-login::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(66, 165, 245, 0.3);
+        }
+
+        .btn-login:hover::before { left: 100%; }
+        .btn-login:active { transform: translateY(0); }
+
+        .register-link {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.9rem;
+            color: rgba(224, 230, 240, 0.5);
+        }
+
+        .register-link a {
+            color: #42a5f5;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .register-link a:hover { color: #90caf9; }
+
+        /* Flash Messages */
+        .flash-messages { margin-bottom: 1.5rem; }
+
+        .flash-message {
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 0.75rem;
+            animation: fadeInUp 0.3s ease-out;
+        }
+
+        .flash-error, .flash-danger { background: rgba(244, 67, 54, 0.1); border: 1px solid rgba(244, 67, 54, 0.2); color: #ef9a9a; }
+        .flash-success { background: rgba(76, 175, 80, 0.1); border: 1px solid rgba(76, 175, 80, 0.2); color: #a5d6a7; }
+        .flash-info { background: rgba(33, 150, 243, 0.1); border: 1px solid rgba(33, 150, 243, 0.2); color: #90caf9; }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; overflow-y: auto; }
+            .brand-panel { min-height: 35vh; padding: 2rem; }
+            .brand-icon { font-size: 3rem; }
+            .brand-name { font-size: 2rem; }
+            .login-panel { padding: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Left Branding Panel -->
+    <div class="brand-panel">
+        <div class="water-drops">
+            <div class="drop"></div>
+            <div class="drop"></div>
+            <div class="drop"></div>
+            <div class="drop"></div>
+            <div class="drop"></div>
+            <div class="drop"></div>
+        </div>
+        <div class="brand-content">
+            <div class="brand-icon">
+                <i class="fas fa-tint"></i>
+            </div>
+            <h1 class="brand-name">AquaFlow</h1>
+            <p class="brand-tagline">Mineral Water Station</p>
+        </div>
+    </div>
+
+    <!-- Right Login Panel -->
+    <div class="login-panel">
+        <div class="login-card">
+            <h2>Welcome Back</h2>
+            <p class="subtitle">Sign in to your account to continue</p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">
+                        <i class="fas {% if category == 'success' %}fa-check-circle{% elif category == 'error' or category == 'danger' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('auth.login') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="username" name="username" class="form-input" placeholder="Enter your username" required autocomplete="username">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="password" name="password" class="form-input" placeholder="Enter your password" required autocomplete="current-password">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                </div>
+
+                <div class="form-options">
+                    <label class="remember-me">
+                        <input type="checkbox" name="remember" id="remember">
+                        <span>Remember me</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-login" id="btn-login">
+                    Sign In <i class="fas fa-arrow-right" style="margin-left: 8px;"></i>
+                </button>
+            </form>
+
+            <p class="register-link">
+                Don't have an account? <a href="{{ url_for('auth.register') }}">Create one</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
