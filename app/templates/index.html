@@ -1,0 +1,565 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome to AquaFlow{% endblock %}
+
+{% block head %}
+<style>
+    /* Landing Page Specific Styling */
+    .hero-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 3rem;
+        padding: 4rem 2rem;
+        background: radial-gradient(circle at 80% 20%, rgba(66, 165, 245, 0.08) 0%, transparent 60%);
+        border-radius: var(--radius-lg);
+        margin-bottom: 3rem;
+    }
+
+    .hero-text {
+        flex: 1.2;
+    }
+
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 14px;
+        background: rgba(66, 165, 245, 0.1);
+        border: 1px solid rgba(66, 165, 245, 0.2);
+        color: var(--accent-blue);
+        font-size: 0.85rem;
+        font-weight: 600;
+        border-radius: 20px;
+        margin-bottom: 1.5rem;
+    }
+
+    .hero-title {
+        font-size: 3rem;
+        line-height: 1.2;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, #ffffff 0%, #90caf9 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+        max-width: 550px;
+    }
+
+    .hero-actions {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 28px;
+        border-radius: var(--radius-md);
+        font-size: 0.95rem;
+        font-weight: 600;
+        transition: var(--transition);
+        cursor: pointer;
+        border: none;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-blue-dark) 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(66, 165, 245, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(66, 165, 245, 0.4);
+    }
+
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.08);
+        transform: translateY(-2px);
+    }
+
+    .hero-image-pane {
+        flex: 0.8;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+    }
+
+    .weather-card {
+        background: rgba(22, 27, 34, 0.7);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        width: 100%;
+        max-width: 320px;
+        box-shadow: var(--shadow-lg);
+        animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .weather-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .weather-loc {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-muted);
+        font-weight: 700;
+    }
+
+    .weather-temp {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .temp-val {
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .weather-icon {
+        font-size: 2.5rem;
+        color: var(--accent-orange);
+    }
+
+    .weather-desc {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin-top: 0.5rem;
+    }
+
+    /* Products Section */
+    .section-title {
+        text-align: center;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .section-subtitle {
+        text-align: center;
+        color: var(--text-secondary);
+        max-width: 600px;
+        margin: 0 auto 3rem auto;
+    }
+
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+        margin-bottom: 4rem;
+        justify-content: center;
+        max-width: 900px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .product-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        text-align: center;
+        transition: var(--transition);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(66, 165, 245, 0.3);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .product-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: rgba(66, 165, 245, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        color: var(--accent-blue);
+        margin-bottom: 1.5rem;
+    }
+
+    .product-name {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+
+    .product-desc {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        margin-bottom: 1.5rem;
+        min-height: 50px;
+    }
+
+    .product-price {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-top: auto;
+        margin-bottom: 1.5rem;
+    }
+
+    .product-price span {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--text-muted);
+    }
+
+    /* Calculator Section */
+    .calculator-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 2.5rem;
+        max-width: 700px;
+        margin: 0 auto 4rem auto;
+    }
+
+    .calc-row {
+        margin-bottom: 2rem;
+    }
+
+    .calc-label {
+        display: flex;
+        justify-content: space-between;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+
+    .calc-slider {
+        width: 100%;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+        outline: none;
+        -webkit-appearance: none;
+        accent-color: var(--accent-blue);
+    }
+
+    .calc-summary {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+        text-align: center;
+    }
+
+    .calc-sum-box {
+        background: rgba(255, 255, 255, 0.02);
+        padding: 1rem;
+        border-radius: var(--radius-md);
+        border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .calc-sum-label {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 5px;
+    }
+
+    .calc-sum-val {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--accent-blue);
+    }
+
+    /* Features Section */
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 2rem;
+        margin-bottom: 4rem;
+    }
+
+    .feature-item {
+        background: rgba(255, 255, 255, 0.01);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        transition: var(--transition);
+    }
+
+    .feature-item:hover {
+        background: rgba(255, 255, 255, 0.02);
+    }
+
+    .feature-item i {
+        font-size: 1.5rem;
+        color: var(--accent-blue);
+        margin-bottom: 1rem;
+    }
+
+    .feature-item h3 {
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .feature-item p {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .hero-container {
+            flex-direction: column;
+            padding: 2rem 1rem;
+            gap: 2rem;
+            text-align: center;
+        }
+
+        .hero-title {
+            font-size: 2.25rem;
+        }
+
+        .hero-subtitle {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-actions {
+            justify-content: center;
+        }
+
+        .hero-image-pane {
+            width: 100%;
+        }
+
+        .calc-summary {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-container">
+    <div class="hero-text">
+        <div class="hero-badge">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>Bancal, Meycauayan, Bulacan</span>
+        </div>
+        <h1 class="hero-title">Refreshing & Pure Water Delivered to Your Doorstep</h1>
+        <p class="hero-subtitle">
+            AquaFlow provides top-tier purified mineral water to the households and businesses of Bancal and nearby neighborhoods. Enjoy hassle-free ordering and fast local deliveries.
+        </p>
+        <div class="hero-actions">
+            {% if current_user.is_authenticated %}
+                {% if current_user.is_admin %}
+                    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary">
+                        <i class="fas fa-th-large"></i> Go to Admin Dashboard
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('customer.dashboard') }}" class="btn btn-primary">
+                        <i class="fas fa-th-large"></i> Go to My Dashboard
+                    </a>
+                {% endif %}
+            {% else %}
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i> Order Online / Register
+                </a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-secondary">
+                    <i class="fas fa-sign-in-alt"></i> Log In
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="hero-image-pane">
+        <!-- Weather Widget -->
+        <div class="weather-card">
+            <div class="weather-header">
+                <span class="weather-loc">Live Weather (Meycauayan)</span>
+                <i class="fas fa-circle-notch fa-spin" style="color:var(--accent-blue); font-size:0.8rem; display:none;" id="weather-spinner"></i>
+            </div>
+            <div class="weather-temp">
+                <i class="fas {% if 'Rain' in weather.current_condition %}fa-cloud-showers-heavy{% elif 'Clear' in weather.current_condition %}fa-sun{% else %}fa-cloud-sun{% endif %} weather-icon" id="weather-icon"></i>
+                <div>
+                    <span class="temp-val" id="temp-val">{{ weather.current_temp }}°C</span>
+                    <div class="weather-desc" id="weather-desc">{{ weather.current_condition }}</div>
+                </div>
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 0.5rem;">
+                {% if weather.current_temp >= 32.5 %}
+                    <i class="fas fa-fire" style="color:var(--accent-orange)"></i> High heat today! Increase your daily water intake.
+                {% else %}
+                    <i class="fas fa-tint" style="color:var(--accent-blue)"></i> Stay healthy and hydrated today.
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Products Section -->
+<section style="margin-bottom: 5rem;">
+    <h2 class="section-title">Our Products & Refills</h2>
+    <p class="section-subtitle">We focus on delivering high-quality purified water in two convenient, durable 5-gallon containers. Select the option that best fits your dispenser type.</p>
+    
+    <div class="products-grid">
+        <div class="product-card">
+            <div class="product-icon">
+                <i class="fas fa-circle-dot"></i>
+            </div>
+            <h3 class="product-name">5-Gallon Round Blue Container</h3>
+            <p class="product-desc">Standard 5-gallon blue container refill. Perfect for top-loading water dispensers. Thoroughly purified and multi-filtered water.</p>
+            <div class="product-price">&#8369;25.00 <span>/ refill</span></div>
+            {% if current_user.is_authenticated and not current_user.is_admin %}
+                <a href="{{ url_for('customer.place_order') }}" class="btn btn-secondary btn-sm" style="padding:8px 16px; font-size:0.85rem;">Order Now</a>
+            {% endif %}
+        </div>
+        
+        <div class="product-card">
+            <div class="product-icon">
+                <i class="fas fa-wine-bottle"></i>
+            </div>
+            <h3 class="product-name">5-Gallon Slim Blue Container</h3>
+            <p class="product-desc">Slim-type 5-gallon container refill. Modern ergonomic shape with built-in handle, making it easy to carry and lift into bottom-load dispensers.</p>
+            <div class="product-price">&#8369;30.00 <span>/ refill</span></div>
+            {% if current_user.is_authenticated and not current_user.is_admin %}
+                <a href="{{ url_for('customer.place_order') }}" class="btn btn-secondary btn-sm" style="padding:8px 16px; font-size:0.85rem;">Order Now</a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Interactive Price Calculator -->
+<section style="margin-bottom: 5rem;">
+    <div class="calculator-card">
+        <h3 style="font-size:1.5rem; text-align:center; margin-bottom: 1.5rem;">Hydration & Cost Estimator</h3>
+        <p style="color:var(--text-secondary); text-align:center; font-size:0.85rem; margin-bottom: 2rem;">
+            Drag the sliders below to estimate your household's monthly water requirements and expenses.
+        </p>
+        
+        <div class="calc-row">
+            <div class="calc-label">
+                <span>5-Gallon Round Container Refills per week:</span>
+                <span id="round-val" style="color:var(--accent-blue)">2</span>
+            </div>
+            <input type="range" min="0" max="20" value="2" class="calc-slider" id="round-slider">
+        </div>
+        
+        <div class="calc-row">
+            <div class="calc-label">
+                <span>5-Gallon Slim Blue Container Refills per week:</span>
+                <span id="slim-val" style="color:var(--accent-blue)">1</span>
+            </div>
+            <input type="range" min="0" max="20" value="1" class="calc-slider" id="slim-slider">
+        </div>
+        
+        <div class="calc-summary">
+            <div class="calc-sum-box">
+                <div class="calc-sum-label">Weekly Total Cost</div>
+                <div class="calc-sum-val" id="weekly-cost">&#8369;80.00</div>
+            </div>
+            <div class="calc-sum-box">
+                <div class="calc-sum-label">Est. Monthly Cost</div>
+                <div class="calc-sum-val" id="monthly-cost">&#8369;320.00</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features section -->
+<section style="margin-bottom: 3rem;">
+    <h2 class="section-title">Why Choose AquaFlow?</h2>
+    <p class="section-subtitle">We guarantee the cleanest water and the most reliable service in Meycauayan.</p>
+    
+    <div class="features-grid">
+        <div class="feature-item">
+            <i class="fas fa-shield-virus"></i>
+            <h3>16-Stage Filtration</h3>
+            <p>Our state-of-the-art multi-stage purification system eliminates impurities, viruses, and heavy metals, leaving clean water.</p>
+        </div>
+        <div class="feature-item">
+            <i class="fas fa-truck-ramp-box"></i>
+            <h3>Free Local Delivery</h3>
+            <p>Fast, friendly delivery straight to your doorstep for orders of 3 or more containers within Bancal area.</p>
+        </div>
+        <div class="feature-item">
+            <i class="fas fa-award"></i>
+            <h3>Quality Sanitization</h3>
+            <p>Every container undergoes rigorous exterior and interior high-temperature cleaning before refilling.</p>
+        </div>
+        <div class="feature-item">
+            <i class="fas fa-mobile-screen-button"></i>
+            <h3>Easy Online Orders</h3>
+            <p>Skip the calls. Order your refills in seconds through our customer portal and track your delivery status.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const roundSlider = document.getElementById('round-slider');
+        const slimSlider = document.getElementById('slim-slider');
+        const roundVal = document.getElementById('round-val');
+        const slimVal = document.getElementById('slim-val');
+        const weeklyCost = document.getElementById('weekly-cost');
+        const monthlyCost = document.getElementById('monthly-cost');
+        
+        const PRICE_ROUND = 25.00;
+        const PRICE_SLIM = 30.00;
+        
+        function updateCosts() {
+            const qtyRound = parseInt(roundSlider.value);
+            const qtySlim = parseInt(slimSlider.value);
+            
+            roundVal.textContent = qtyRound;
+            slimVal.textContent = qtySlim;
+            
+            const weekly = (qtyRound * PRICE_ROUND) + (qtySlim * PRICE_SLIM);
+            const monthly = weekly * 4;
+            
+            weeklyCost.innerHTML = '&#8369;' + weekly.toFixed(2);
+            monthlyCost.innerHTML = '&#8369;' + monthly.toFixed(2);
+        }
+        
+        roundSlider.addEventListener('input', updateCosts);
+        slimSlider.addEventListener('input', updateCosts);
+        
+        // Initial run
+        updateCosts();
+    });
+</script>
+{% endblock %}

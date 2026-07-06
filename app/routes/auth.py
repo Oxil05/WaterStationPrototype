@@ -110,8 +110,6 @@ def logout():
 
 @auth_bp.route('/')
 def index():
-    if current_user.is_authenticated:
-        if current_user.is_admin:
-            return redirect(url_for('admin.dashboard'))
-        return redirect(url_for('customer.dashboard'))
-    return redirect(url_for('auth.login'))
+    from app.weather_service import get_weather_forecast
+    weather = get_weather_forecast()
+    return render_template('index.html', weather=weather)

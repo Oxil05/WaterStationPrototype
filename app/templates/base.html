@@ -59,9 +59,9 @@
             <span>AquaFlow</span>
         </div>
         <div class="nav-links">
-            <a href="#" class="nav-item">Dashboard</a>
-            <a href="#" class="nav-item">My Orders</a>
-            <a href="#" class="nav-item">Profile</a>
+            <a href="{{ url_for('customer.dashboard') }}" class="nav-item {% if request.endpoint == 'customer.dashboard' %}active{% endif %}">Dashboard</a>
+            <a href="{{ url_for('customer.place_order') }}" class="nav-item {% if request.endpoint == 'customer.place_order' %}active{% endif %}">Order Refill</a>
+            <a href="{{ url_for('customer.profile') }}" class="nav-item {% if request.endpoint == 'customer.profile' %}active{% endif %}">Delivery Profile</a>
             <a href="{{ url_for('auth.logout') }}" class="nav-item logout">Logout</a>
         </div>
     </nav>

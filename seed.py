@@ -23,15 +23,15 @@ def seed():
 
         # Create products
         round_container = Product(
-            name='5-Gallon Round Container (Refill)',
-            description='Standard 5-gallon round water container refill with purified mineral water.',
+            name='5-Gallon Round Blue Container (Refill)',
+            description='Standard 5-gallon round blue water container refill with purified mineral water.',
             price=25.00,
             stock_quantity=500,
             unit='gallon'
         )
         slim_container = Product(
-            name='5-Gallon Slim Container (Refill)',
-            description='Slim-type 5-gallon water container refill with purified mineral water.',
+            name='5-Gallon Slim Blue Container (Refill)',
+            description='Slim-type 5-gallon blue water container refill with purified mineral water.',
             price=30.00,
             stock_quantity=300,
             unit='gallon'

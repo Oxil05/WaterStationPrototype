@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Order Refill{% endblock %}
+{% block page_title %}Order Refills{% endblock %}
+
+{% block content %}
+<div style="max-width: 700px; margin: 0 auto;">
+    <div class="section-header">
+        <h2>Place Refill Order</h2>
+        <a href="{{ url_for('customer.dashboard') }}" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.85rem;">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Check if profile needs details -->
+    {% if not customer.address or not customer.phone %}
+    <div style="background: rgba(239, 83, 80, 0.1); border: 1px solid rgba(239, 83, 80, 0.2); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 2rem; color: #ef9a9a; display: flex; gap: 15px; align-items: flex-start;">
+        <i class="fas fa-exclamation-triangle" style="font-size: 1.2rem; margin-top: 2px;"></i>
+        <div>
+            <strong style="display:block; margin-bottom:4px;">Delivery Information Required</strong>
+            <span style="font-size:0.85rem; line-height:1.4;">Before placing an order, you must provide a valid delivery address and contact phone number. Please update your profile now.</span>
+            <a href="{{ url_for('customer.profile') }}" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem; margin-top: 10px; border-radius:var(--radius-sm)">
+                Update Profile
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem;">
+        <form action="{{ url_for('customer.place_order') }}" method="POST" id="order-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <h3 style="font-size: 1.1rem; margin-bottom: 1.5rem; color: var(--text-primary);">Select Refills</h3>
+            
+            <!-- Products List -->
+            <div style="display:flex; flex-direction:column; gap: 1.5rem; margin-bottom: 2rem;">
+                {% for product in products %}
+                <div class="product-selection-row" style="display:flex; justify-content:space-between; align-items:center; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-color);" data-price="{{ product.price }}" data-id="{{ product.id }}">
+                    <div style="flex:1; padding-right:1rem;">
+                        <h4 style="font-size: 1rem; color: var(--text-primary); margin-bottom: 4px;">{{ product.name }}</h4>
+                        <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">{{ product.description }}</p>
+                    </div>
+                    
+                    <div style="display:flex; align-items:center; gap: 1.5rem;">
+                        <span style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary);">&#8369;{{ "%.2f"|format(product.price) }}</span>
+                        
+                        <!-- Qty Input group -->
+                        <div style="display:flex; align-items:center; border: 1px solid var(--border-color); border-radius: var(--radius-sm); overflow:hidden;">
+                            <button type="button" class="qty-btn qty-minus" style="padding: 8px 12px; background: rgba(255,255,255,0.02); color: var(--text-primary); border: none; cursor:pointer;" onclick="adjustQty({{ product.id }}, -1)">-</button>
+                            <input type="number" name="qty_{{ product.id }}" id="qty-input-{{ product.id }}" value="0" min="0" max="99" style="width: 50px; text-align:center; background:none; color: var(--text-primary); border: none; font-weight:600; -moz-appearance: textfield;" readonly>
+                            <button type="button" class="qty-btn qty-plus" style="padding: 8px 12px; background: rgba(255,255,255,0.02); color: var(--text-primary); border: none; cursor:pointer;" onclick="adjustQty({{ product.id }}, 1)">+</button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Notes -->
+            <div style="margin-bottom: 2rem;">
+                <label for="notes" style="display:block; font-size: 0.85rem; color: var(--text-secondary); font-weight:600; margin-bottom: 8px;">Delivery Notes / Instructions:</label>
+                <textarea name="notes" id="notes" rows="3" placeholder="e.g. Leave by the blue gate, call before arriving..." style="width:100%; padding:12px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary); font-family:inherit; font-size: 0.9rem; resize:vertical; outline:none; transition:var(--transition);"></textarea>
+            </div>
+            
+            <!-- Summary Box -->
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 2rem; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <span style="font-size:0.8rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Estimated Total Amount</span>
+                </div>
+                <div>
+                    <span id="order-total" style="font-size: 1.8rem; font-weight: 800; color: var(--accent-blue);">&#8369;0.00</span>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;" {% if not customer.address or not customer.phone %}disabled style="opacity: 0.5; cursor: not-allowed;"{% endif %}>
+                <i class="fas fa-check-circle"></i> Confirm Order Refill
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const prices = {};
+    {% for product in products %}
+    prices[{{ product.id }}] = {{ product.price }};
+    {% endfor %}
+    
+    function adjustQty(productId, amount) {
+        const input = document.getElementById('qty-input-' + productId);
+        let val = parseInt(input.value) + amount;
+        if (val < 0) val = 0;
+        if (val > 99) val = 99;
+        input.value = val;
+        
+        updateTotal();
+    }
+    
+    function updateTotal() {
+        let total = 0.0;
+        for (const [id, price] of Object.entries(prices)) {
+            const qty = parseInt(document.getElementById('qty-input-' + id).value) || 0;
+            total += qty * price;
+        }
+        
+        document.getElementById('order-total').innerHTML = '&#8369;' + total.toFixed(2);
+    }
+</script>
+{% endblock %}
