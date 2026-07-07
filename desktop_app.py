@@ -56,7 +56,7 @@ class WaterStationApp(ctk.CTk):
             text="AquaFlow POS", 
             font=ctk.CTkFont(size=20, weight="bold")
         )
-        self.brand_label.grid(row=0, column=0, px=20, py=(20, 10))
+        self.brand_label.grid(row=0, column=0, padx=20, pady=(20, 10))
         
         self.loc_label = ctk.CTkLabel(
             self.sidebar_frame, 
@@ -64,43 +64,43 @@ class WaterStationApp(ctk.CTk):
             font=ctk.CTkFont(size=11),
             text_color="gray"
         )
-        self.loc_label.grid(row=1, column=0, px=20, py=(0, 20))
+        self.loc_label.grid(row=1, column=0, padx=20, pady=(0, 20))
         
         # Sidebar navigation buttons
         self.btn_dashboard = ctk.CTkButton(
             self.sidebar_frame, text="Dashboard", anchor="w", command=self.show_dashboard
         )
-        self.btn_dashboard.grid(row=2, column=0, px=20, py=5, sticky="ew")
+        self.btn_dashboard.grid(row=2, column=0, padx=20, pady=5, sticky="ew")
         
         self.btn_pos = ctk.CTkButton(
             self.sidebar_frame, text="POS Sales Terminal", anchor="w", command=self.show_pos
         )
-        self.btn_pos.grid(row=3, column=0, px=20, py=5, sticky="ew")
+        self.btn_pos.grid(row=3, column=0, padx=20, pady=5, sticky="ew")
         
         self.btn_monitor = ctk.CTkButton(
             self.sidebar_frame, text="Web Order Monitor", anchor="w", command=self.show_monitor
         )
-        self.btn_monitor.grid(row=4, column=0, px=20, py=5, sticky="ew")
+        self.btn_monitor.grid(row=4, column=0, padx=20, pady=5, sticky="ew")
         
         self.btn_history = ctk.CTkButton(
             self.sidebar_frame, text="Transaction History", anchor="w", command=self.show_history
         )
-        self.btn_history.grid(row=5, column=0, px=20, py=5, sticky="ew")
+        self.btn_history.grid(row=5, column=0, padx=20, pady=5, sticky="ew")
         
         self.btn_ai = ctk.CTkButton(
             self.sidebar_frame, text="AI Predictions", anchor="w", command=self.show_ai
         )
-        self.btn_ai.grid(row=6, column=0, px=20, py=5, sticky="ew")
+        self.btn_ai.grid(row=6, column=0, padx=20, pady=5, sticky="ew")
         
         # App Version Label
         self.version_label = ctk.CTkLabel(
             self.sidebar_frame, text="v1.0.0 (Bulacan Edition)", font=ctk.CTkFont(size=10), text_color="gray"
         )
-        self.version_label.grid(row=7, column=0, py=15)
+        self.version_label.grid(row=7, column=0, pady=15)
         
         # Main Container Frame
         self.main_container = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
-        self.main_container.grid(row=0, column=1, sticky="nsew", px=20, py=20)
+        self.main_container.grid(row=0, column=1, sticky="nsew", padx=20, pady=20)
         self.main_container.grid_columnconfigure(0, weight=1)
         self.main_container.grid_rowconfigure(0, weight=1)
         
@@ -173,35 +173,35 @@ class WaterStationApp(ctk.CTk):
         
         # Header
         header = ctk.CTkLabel(view, text="Operator Command Dashboard", font=ctk.CTkFont(size=22, weight="bold"))
-        header.pack(anchor="w", py=(0, 20))
+        header.pack(anchor="w", pady=(0, 20))
         
         # KPI Container
         kpi_frame = ctk.CTkFrame(view, fg_color="transparent")
-        kpi_frame.pack(fill="x", py=(0, 20))
+        kpi_frame.pack(fill="x", pady=(0, 20))
         
         # KPI Card 1: Today's Revenue
         self.kpi_rev = ctk.CTkFrame(kpi_frame, width=220, height=100)
-        self.kpi_rev.pack(side="left", expand=True, fill="both", px=5)
+        self.kpi_rev.pack(side="left", expand=True, fill="both", padx=5)
         self.kpi_rev_lbl = ctk.CTkLabel(self.kpi_rev, text="TODAY'S REVENUE", font=ctk.CTkFont(size=10, weight="bold"), text_color="gray")
-        self.kpi_rev_lbl.pack(anchor="w", px=15, py=(15, 0))
+        self.kpi_rev_lbl.pack(anchor="w", padx=15, pady=(15, 0))
         self.kpi_rev_val = ctk.CTkLabel(self.kpi_rev, text="₱0.00", font=ctk.CTkFont(size=24, weight="bold"), text_color="#10b981")
-        self.kpi_rev_val.pack(anchor="w", px=15, py=(5, 15))
+        self.kpi_rev_val.pack(anchor="w", padx=15, pady=(5, 15))
         
         # KPI Card 2: Pending Orders
         self.kpi_orders = ctk.CTkFrame(kpi_frame, width=220, height=100)
-        self.kpi_orders.pack(side="left", expand=True, fill="both", px=5)
+        self.kpi_orders.pack(side="left", expand=True, fill="both", padx=5)
         self.kpi_orders_lbl = ctk.CTkLabel(self.kpi_orders, text="PENDING WEB ORDERS", font=ctk.CTkFont(size=10, weight="bold"), text_color="gray")
-        self.kpi_orders_lbl.pack(anchor="w", px=15, py=(15, 0))
+        self.kpi_orders_lbl.pack(anchor="w", padx=15, pady=(15, 0))
         self.kpi_orders_val = ctk.CTkLabel(self.kpi_orders, text="0", font=ctk.CTkFont(size=24, weight="bold"), text_color="#3b82f6")
-        self.kpi_orders_val.pack(anchor="w", px=15, py=(5, 15))
+        self.kpi_orders_val.pack(anchor="w", padx=15, pady=(5, 15))
         
         # KPI Card 3: Stock Status
         self.kpi_stock = ctk.CTkFrame(kpi_frame, width=220, height=100)
-        self.kpi_stock.pack(side="left", expand=True, fill="both", px=5)
+        self.kpi_stock.pack(side="left", expand=True, fill="both", padx=5)
         self.kpi_stock_lbl = ctk.CTkLabel(self.kpi_stock, text="LOW INVENTORY ALERTS", font=ctk.CTkFont(size=10, weight="bold"), text_color="gray")
-        self.kpi_stock_lbl.pack(anchor="w", px=15, py=(15, 0))
+        self.kpi_stock_lbl.pack(anchor="w", padx=15, pady=(15, 0))
         self.kpi_stock_val = ctk.CTkLabel(self.kpi_stock, text="OK", font=ctk.CTkFont(size=24, weight="bold"), text_color="#ef4444")
-        self.kpi_stock_val.pack(anchor="w", px=15, py=(5, 15))
+        self.kpi_stock_val.pack(anchor="w", padx=15, pady=(5, 15))
         
         # Split pane (Weather & Recent orders)
         split_frame = ctk.CTkFrame(view, fg_color="transparent")
@@ -209,16 +209,16 @@ class WaterStationApp(ctk.CTk):
         
         # Weather Display Box (Left)
         weather_box = ctk.CTkFrame(split_frame, width=300)
-        weather_box.pack(side="left", fill="both", expand=False, px=(0, 10))
+        weather_box.pack(side="left", fill="both", expand=False, padx=(0, 10))
         
         w_lbl = ctk.CTkLabel(weather_box, text="LIVE WEATHER (MEYCAUAYAN)", font=ctk.CTkFont(size=11, weight="bold"), text_color="gray")
-        w_lbl.pack(anchor="w", px=15, py=(15, 10))
+        w_lbl.pack(anchor="w", padx=15, pady=(15, 10))
         
         self.dash_weather_temp = ctk.CTkLabel(weather_box, text="--°C", font=ctk.CTkFont(size=36, weight="bold"))
-        self.dash_weather_temp.pack(anchor="w", px=15, py=5)
+        self.dash_weather_temp.pack(anchor="w", padx=15, pady=5)
         
         self.dash_weather_desc = ctk.CTkLabel(weather_box, text="Fetching...", font=ctk.CTkFont(size=14, weight="bold"), text_color="gray")
-        self.dash_weather_desc.pack(anchor="w", px=15, py=5)
+        self.dash_weather_desc.pack(anchor="w", padx=15, pady=5)
         
         self.dash_weather_tips = ctk.CTkLabel(
             weather_box, 
@@ -228,24 +228,24 @@ class WaterStationApp(ctk.CTk):
             wraplength=200,
             justify="left"
         )
-        self.dash_weather_tips.pack(anchor="w", px=15, py=(10, 15))
+        self.dash_weather_tips.pack(anchor="w", padx=15, pady=(10, 15))
         
         # Stock Summary details inside weather box
         stock_header = ctk.CTkLabel(weather_box, text="CURRENT STOCK LEVELS", font=ctk.CTkFont(size=11, weight="bold"), text_color="gray")
-        stock_header.pack(anchor="w", px=15, py=(15, 5))
+        stock_header.pack(anchor="w", padx=15, pady=(15, 5))
         
         self.dash_stock_round = ctk.CTkLabel(weather_box, text="Round Container: --", font=ctk.CTkFont(size=12))
-        self.dash_stock_round.pack(anchor="w", px=15, py=2)
+        self.dash_stock_round.pack(anchor="w", padx=15, pady=2)
         
         self.dash_stock_slim = ctk.CTkLabel(weather_box, text="Slim Blue: --", font=ctk.CTkFont(size=12))
-        self.dash_stock_slim.pack(anchor="w", px=15, py=2)
+        self.dash_stock_slim.pack(anchor="w", padx=15, pady=2)
         
         # Recent Completed Sales Table (Right)
         sales_box = ctk.CTkFrame(split_frame)
-        sales_box.pack(side="right", fill="both", expand=True, px=(10, 0))
+        sales_box.pack(side="right", fill="both", expand=True, padx=(10, 0))
         
         sales_lbl = ctk.CTkLabel(sales_box, text="RECENT REGISTERED TRANSACTIONS", font=ctk.CTkFont(size=11, weight="bold"), text_color="gray")
-        sales_lbl.pack(anchor="w", px=15, py=(15, 10))
+        sales_lbl.pack(anchor="w", padx=15, pady=(15, 10))
         
         # Tkinter Treeview for styling
         self.dash_tree = self.create_custom_tree(
@@ -253,7 +253,7 @@ class WaterStationApp(ctk.CTk):
             ["Order #", "Recipient", "Total Cost", "Order Status", "Date"],
             [60, 150, 100, 100, 150]
         )
-        self.dash_tree.pack(fill="both", expand=True, px=15, py=(0, 15))
+        self.dash_tree.pack(fill="both", expand=True, padx=15, pady=(0, 15))
         
     def refresh_dashboard_data(self):
         # 1. Weather
@@ -357,23 +357,23 @@ class WaterStationApp(ctk.CTk):
         
         # Left Panel: POS inputs
         left_panel = ctk.CTkFrame(view)
-        left_panel.grid(row=0, column=0, sticky="nsew", px=(0, 10), py=10)
+        left_panel.grid(row=0, column=0, sticky="nsew", padx=(0, 10), pady=10)
         
         lbl_pos_title = ctk.CTkLabel(left_panel, text="New Sales Transaction", font=ctk.CTkFont(size=18, weight="bold"))
-        lbl_pos_title.pack(anchor="w", px=20, py=20)
+        lbl_pos_title.pack(anchor="w", padx=20, pady=20)
         
         # Customer Dropdown Selector
         ct_lbl = ctk.CTkLabel(left_panel, text="Select Customer Profile:", font=ctk.CTkFont(size=11, weight="bold"), text_color="gray")
-        ct_lbl.pack(anchor="w", px=20, py=(0, 5))
+        ct_lbl.pack(anchor="w", padx=20, pady=(0, 5))
         
         self.pos_customer_dropdown = ctk.CTkComboBox(left_panel, width=350, state="readonly")
-        self.pos_customer_dropdown.pack(anchor="w", px=20, py=(0, 20))
+        self.pos_customer_dropdown.pack(anchor="w", padx=20, pady=(0, 20))
         
         # Product Refill Item Row 1 (Round Container)
         prod1_frame = ctk.CTkFrame(left_panel, fg_color="transparent")
-        prod1_frame.pack(fill="x", px=20, py=10)
+        prod1_frame.pack(fill="x", padx=20, pady=10)
         
-        self.prod1_name = ctk.CTkLabel(prod1_frame, text="5-Gallon Round Blue Container Refill (₱25.00)", font=ctk.CTkFont(size=13, weight="semibold"))
+        self.prod1_name = ctk.CTkLabel(prod1_frame, text="5-Gallon Round Blue Container Refill (₱25.00)", font=ctk.CTkFont(size=13, weight="bold"))
         self.prod1_name.pack(side="left")
         
         # Qty Picker
@@ -382,39 +382,39 @@ class WaterStationApp(ctk.CTk):
         
         # Product Refill Item Row 2 (Slim Blue Container)
         prod2_frame = ctk.CTkFrame(left_panel, fg_color="transparent")
-        prod2_frame.pack(fill="x", px=20, py=10)
+        prod2_frame.pack(fill="x", padx=20, pady=10)
         
-        self.prod2_name = ctk.CTkLabel(prod2_frame, text="5-Gallon Slim Blue Container Refill (₱30.00)", font=ctk.CTkFont(size=13, weight="semibold"))
+        self.prod2_name = ctk.CTkLabel(prod2_frame, text="5-Gallon Slim Blue Container Refill (₱30.00)", font=ctk.CTkFont(size=13, weight="bold"))
         self.prod2_name.pack(side="left")
         
         self.prod2_qty = self.create_qty_picker(prod2_frame, "qty2")
         
         # Order Notes
         notes_lbl = ctk.CTkLabel(left_panel, text="Optional Sales Notes / Driver Info:", font=ctk.CTkFont(size=11, weight="bold"), text_color="gray")
-        notes_lbl.pack(anchor="w", px=20, py=(15, 5))
+        notes_lbl.pack(anchor="w", padx=20, pady=(15, 5))
         self.pos_notes = ctk.CTkTextbox(left_panel, height=80, width=400)
-        self.pos_notes.pack(anchor="w", px=20, py=(0, 20))
+        self.pos_notes.pack(anchor="w", padx=20, pady=(0, 20))
         
         # Right Panel: Sales Receipt / Checkout Summary
         right_panel = ctk.CTkFrame(view)
-        right_panel.grid(row=0, column=1, sticky="nsew", px=(10, 0), py=10)
+        right_panel.grid(row=0, column=1, sticky="nsew", padx=(10, 0), pady=10)
         
         lbl_summary_title = ctk.CTkLabel(right_panel, text="Checkout Summary", font=ctk.CTkFont(size=18, weight="bold"))
-        lbl_summary_title.pack(anchor="w", px=20, py=20)
+        lbl_summary_title.pack(anchor="w", padx=20, pady=20)
         
         # Total Box
-        total_frame = ctk.CTkFrame(right_panel, fg_color="rgba(66, 165, 245, 0.05)", border_width=1, border_color="rgba(66, 165, 245, 0.15)")
-        total_frame.pack(fill="x", px=20, py=10)
+        total_frame = ctk.CTkFrame(right_panel, fg_color="#1a2233", border_width=1, border_color="#2b3a55")
+        total_frame.pack(fill="x", padx=20, pady=10)
         
         t_lbl = ctk.CTkLabel(total_frame, text="TOTAL AMOUNT DUE", font=ctk.CTkFont(size=10, weight="bold"), text_color="gray")
-        t_lbl.pack(anchor="w", px=15, py=(15, 0))
+        t_lbl.pack(anchor="w", padx=15, pady=(15, 0))
         
-        self.pos_total_label = ctk.CTkLabel(total_frame, text="₱0.00", font=ctk.CTkFont(size=30, weight="extrabold"), text_color="#3b82f6")
-        self.pos_total_label.pack(anchor="w", px=15, py=(5, 15))
+        self.pos_total_label = ctk.CTkLabel(total_frame, text="₱0.00", font=ctk.CTkFont(size=30, weight="bold"), text_color="#3b82f6")
+        self.pos_total_label.pack(anchor="w", padx=15, pady=(5, 15))
         
         # Delivery Driver Dropdown (If walkin, set driver to None)
         drv_lbl = ctk.CTkLabel(right_panel, text="Delivery / Walk-in Mode:", font=ctk.CTkFont(size=11, weight="bold"), text_color="gray")
-        drv_lbl.pack(anchor="w", px=20, py=(10, 5))
+        drv_lbl.pack(anchor="w", padx=20, pady=(10, 5))
         
         self.pos_delivery_mode = ctk.CTkComboBox(
             right_panel, 
@@ -422,7 +422,7 @@ class WaterStationApp(ctk.CTk):
             state="readonly"
         )
         self.pos_delivery_mode.set("Over-the-Counter (Walk-in)")
-        self.pos_delivery_mode.pack(fill="x", px=20, py=(0, 20))
+        self.pos_delivery_mode.pack(fill="x", padx=20, pady=(0, 20))
         
         # Checkout actions
         self.btn_checkout = ctk.CTkButton(
@@ -434,7 +434,7 @@ class WaterStationApp(ctk.CTk):
             font=ctk.CTkFont(weight="bold"),
             command=self.process_pos_checkout
         )
-        self.btn_checkout.pack(fill="x", px=20, py=10)
+        self.btn_checkout.pack(fill="x", padx=20, pady=10)
         
         self.btn_reset_pos = ctk.CTkButton(
             right_panel, 
@@ -444,7 +444,7 @@ class WaterStationApp(ctk.CTk):
             border_color="gray",
             command=self.reset_pos_fields
         )
-        self.btn_reset_pos.pack(fill="x", px=20, py=5)
+        self.btn_reset_pos.pack(fill="x", padx=20, pady=5)
         
     def create_qty_picker(self, parent, tag):
         picker_frame = ctk.CTkFrame(parent, fg_color="transparent")
@@ -461,7 +461,7 @@ class WaterStationApp(ctk.CTk):
         
         # Qty Input display
         lbl_qty = ctk.CTkLabel(picker_frame, text="0", font=ctk.CTkFont(weight="bold"), width=40)
-        lbl_qty.pack(side="left", px=5)
+        lbl_qty.pack(side="left", padx=5)
         
         # Plus Button
         btn_plus = ctk.CTkButton(
@@ -618,7 +618,7 @@ class WaterStationApp(ctk.CTk):
         view.grid_rowconfigure(1, weight=1)
         
         header_frame = ctk.CTkFrame(view, fg_color="transparent")
-        header_frame.grid(row=0, column=0, sticky="ew", py=(0, 10))
+        header_frame.grid(row=0, column=0, sticky="ew", pady=(0, 10))
         
         lbl_mon = ctk.CTkLabel(header_frame, text="Incoming Web Order Monitor", font=ctk.CTkFont(size=18, weight="bold"))
         lbl_mon.pack(side="left")
@@ -628,7 +628,7 @@ class WaterStationApp(ctk.CTk):
         
         # Order Monitor Grid layout
         monitor_main = ctk.CTkFrame(view)
-        monitor_main.grid(row=1, column=0, sticky="nsew", py=10)
+        monitor_main.grid(row=1, column=0, sticky="nsew", pady=10)
         
         # Split: Left order list, Right order details pane
         monitor_main.grid_columnconfigure(0, weight=1)
@@ -637,7 +637,7 @@ class WaterStationApp(ctk.CTk):
         
         # Tree list of active orders
         list_box = ctk.CTkFrame(monitor_main)
-        list_box.grid(row=0, column=0, sticky="nsew", px=(10, 5), py=10)
+        list_box.grid(row=0, column=0, sticky="nsew", padx=(10, 5), pady=10)
         
         self.mon_tree = self.create_custom_tree(
             list_box, 
@@ -649,45 +649,45 @@ class WaterStationApp(ctk.CTk):
         
         # Details & Action Panel (Right)
         self.details_panel = ctk.CTkFrame(monitor_main)
-        self.details_panel.grid(row=0, column=1, sticky="nsew", px=(5, 10), py=10)
+        self.details_panel.grid(row=0, column=1, sticky="nsew", padx=(5, 10), pady=10)
         
         self.lbl_details_title = ctk.CTkLabel(self.details_panel, text="Order Details", font=ctk.CTkFont(size=15, weight="bold"))
-        self.lbl_details_title.pack(anchor="w", px=20, py=15)
+        self.lbl_details_title.pack(anchor="w", padx=20, pady=15)
         
         # Data box
         self.mon_details_text = ctk.CTkTextbox(self.details_panel, height=250, font=ctk.CTkFont(family="Consolas", size=12))
-        self.mon_details_text.pack(fill="x", px=20, py=5)
+        self.mon_details_text.pack(fill="x", padx=20, pady=5)
         self.mon_details_text.configure(state="disabled")
         
         # Driver assignment
         drv_lbl = ctk.CTkLabel(self.details_panel, text="Assign Driver (for Delivery):", font=ctk.CTkFont(size=11, weight="bold"), text_color="gray")
-        drv_lbl.pack(anchor="w", px=20, py=(15, 2))
+        drv_lbl.pack(anchor="w", padx=20, pady=(15, 2))
         
         self.mon_driver_combobox = ctk.CTkComboBox(self.details_panel, values=["Carlos", "Miguel", "Ramon"], state="readonly")
-        self.mon_driver_combobox.pack(fill="x", px=20, py=(2, 15))
+        self.mon_driver_combobox.pack(fill="x", padx=20, pady=(2, 15))
         self.mon_driver_combobox.set("Carlos")
         
         # Action buttons
         btn_frame = ctk.CTkFrame(self.details_panel, fg_color="transparent")
-        btn_frame.pack(fill="x", px=20, py=10)
+        btn_frame.pack(fill="x", padx=20, pady=10)
         
         self.btn_mon_confirm = ctk.CTkButton(
             btn_frame, text="Confirm Order", fg_color="#3b82f6", hover_color="#2563eb", width=120,
             command=self.confirm_web_order
         )
-        self.btn_mon_confirm.pack(side="left", expand=True, px=2)
+        self.btn_mon_confirm.pack(side="left", expand=True, padx=2)
         
         self.btn_mon_dispatch = ctk.CTkButton(
             btn_frame, text="Dispatch Delivery", fg_color="#8b5cf6", hover_color="#7c3aed", width=120,
             command=self.dispatch_web_order
         )
-        self.btn_mon_dispatch.pack(side="left", expand=True, px=2)
+        self.btn_mon_dispatch.pack(side="left", expand=True, padx=2)
         
         self.btn_mon_complete = ctk.CTkButton(
             btn_frame, text="Mark Delivered", fg_color="#10b981", hover_color="#059669", width=120,
             command=self.complete_web_order
         )
-        self.btn_mon_complete.pack(side="left", expand=True, px=2)
+        self.btn_mon_complete.pack(side="left", expand=True, padx=2)
         
         self.selected_mon_order_id = None
         self.disable_monitor_actions()
@@ -911,28 +911,28 @@ class WaterStationApp(ctk.CTk):
         
         # Filters toolbar
         toolbar = ctk.CTkFrame(view)
-        toolbar.grid(row=0, column=0, sticky="ew", py=(0, 10))
+        toolbar.grid(row=0, column=0, sticky="ew", pady=(0, 10))
         
         lbl_search = ctk.CTkLabel(toolbar, text="Search Customer Name:", font=ctk.CTkFont(size=11, weight="bold"))
-        lbl_search.pack(side="left", px=15, py=10)
+        lbl_search.pack(side="left", padx=15, pady=10)
         
         self.hist_search_entry = ctk.CTkEntry(toolbar, width=180, placeholder_text="Enter name...")
-        self.hist_search_entry.pack(side="left", px=5, py=10)
+        self.hist_search_entry.pack(side="left", padx=5, pady=10)
         self.hist_search_entry.bind("<KeyRelease>", lambda e: self.refresh_history_data())
         
         lbl_status = ctk.CTkLabel(toolbar, text="Status Filter:", font=ctk.CTkFont(size=11, weight="bold"))
-        lbl_status.pack(side="left", px=15, py=10)
+        lbl_status.pack(side="left", padx=15, pady=10)
         
         self.hist_status_filter = ctk.CTkComboBox(
             toolbar, width=120, values=["ALL", "Completed", "Confirmed", "Pending", "Cancelled"], state="readonly",
             command=lambda v: self.refresh_history_data()
         )
-        self.hist_status_filter.pack(side="left", px=5, py=10)
+        self.hist_status_filter.pack(side="left", padx=5, pady=10)
         self.hist_status_filter.set("ALL")
         
         # History table container
         table_container = ctk.CTkFrame(view)
-        table_container.grid(row=1, column=0, sticky="nsew", py=10)
+        table_container.grid(row=1, column=0, sticky="nsew", pady=10)
         
         self.hist_tree = self.create_custom_tree(
             table_container,
@@ -1003,17 +1003,17 @@ class WaterStationApp(ctk.CTk):
         
         # Left Panel: Customer Refill Predictions
         refill_panel = ctk.CTkFrame(view)
-        refill_panel.grid(row=0, column=0, sticky="nsew", px=(0, 10), py=10)
+        refill_panel.grid(row=0, column=0, sticky="nsew", padx=(0, 10), pady=10)
         
         lbl_ai_c = ctk.CTkLabel(refill_panel, text="AI Customer Refill Scheduler", font=ctk.CTkFont(size=16, weight="bold"))
-        lbl_ai_c.pack(anchor="w", px=15, py=15)
+        lbl_ai_c.pack(anchor="w", padx=15, pady=15)
         
         lbl_ai_c_desc = ctk.CTkLabel(
             refill_panel, 
             text="Predicts customer refills based on their historic ordering intervals and flags who is due.",
             font=ctk.CTkFont(size=11), text_color="gray"
         )
-        lbl_ai_c_desc.pack(anchor="w", px=15, py=(0, 10))
+        lbl_ai_c_desc.pack(anchor="w", padx=15, pady=(0, 10))
         
         # Refill Table
         self.refill_tree = self.create_custom_tree(
@@ -1021,18 +1021,18 @@ class WaterStationApp(ctk.CTk):
             ["Customer", "Last Refill", "Est. Refill", "Cycle (Days)", "Status"],
             [120, 90, 90, 80, 80]
         )
-        self.refill_tree.pack(fill="both", expand=True, px=15, py=(0, 15))
+        self.refill_tree.pack(fill="both", expand=True, padx=15, pady=(0, 15))
         self.refill_tree.bind("<<TreeviewSelect>>", self.on_refill_customer_select)
         
         # Right Panel: 7-Day Demand Forecasting Chart
         self.forecast_panel = ctk.CTkFrame(view)
-        self.forecast_panel.grid(row=0, column=1, sticky="nsew", px=(10, 0), py=10)
+        self.forecast_panel.grid(row=0, column=1, sticky="nsew", padx=(10, 0), pady=10)
         
         lbl_ai_f = ctk.CTkLabel(self.forecast_panel, text="7-Day Weather-Integrated Demand Forecast", font=ctk.CTkFont(size=16, weight="bold"))
-        lbl_ai_f.pack(anchor="w", px=15, py=15)
+        lbl_ai_f.pack(anchor="w", padx=15, pady=15)
         
         self.forecast_canvas_frame = ctk.CTkFrame(self.forecast_panel, fg_color="transparent")
-        self.forecast_canvas_frame.pack(fill="both", expand=True, px=15, py=(0, 15))
+        self.forecast_canvas_frame.pack(fill="both", expand=True, padx=15, pady=(0, 15))
         
     def refresh_ai_data(self):
         # 1. Load customer refill predictions
