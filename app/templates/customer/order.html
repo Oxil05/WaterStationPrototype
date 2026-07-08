@@ -1,54 +1,130 @@
 {% extends 'base.html' %}
 
-{% block title %}Order Refill{% endblock %}
-{% block page_title %}Order Refills{% endblock %}
+{% block title %}Request Refill{% endblock %}
+{% block page_title %}Request Refill{% endblock %}
+
+{% block head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    .order-card {
+        background: var(--bg-card);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 3rem 2.5rem;
+        box-shadow: var(--shadow-lg);
+        position: relative;
+    }
+    
+    .qty-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition);
+    }
+    
+    .qty-btn:hover {
+        background: rgba(6, 182, 212, 0.1);
+        border-color: rgba(6, 182, 212, 0.35);
+        color: var(--accent-blue);
+        box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
+    }
+    
+    .total-box {
+        background: linear-gradient(135deg, rgba(255,255,255,0.01) 0%, rgba(6, 182, 212, 0.03) 100%);
+        border: 1px solid rgba(6, 182, 212, 0.2);
+        box-shadow: 0 0 20px rgba(6, 182, 212, 0.05);
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        transition: var(--transition);
+    }
+    
+    .total-box:hover {
+        border-color: rgba(6, 182, 212, 0.35);
+        box-shadow: 0 0 25px rgba(6, 182, 212, 0.08);
+    }
+    
+    .btn-submit-refill {
+        background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-blue-dark) 100%);
+        color: white;
+        font-weight: 700;
+        font-family: 'Outfit', sans-serif;
+        box-shadow: 0 4px 15px rgba(6, 182, 212, 0.25);
+        width: 100%;
+        height: 50px;
+        font-size: 1rem;
+        border-radius: var(--radius-md);
+    }
+    
+    .btn-submit-refill:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 22px rgba(6, 182, 212, 0.45);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div style="max-width: 700px; margin: 0 auto;">
+<div style="max-width: 720px; margin: 0 auto;">
     <div class="section-header">
-        <h2>Place Refill Order</h2>
-        <a href="{{ url_for('customer.dashboard') }}" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.85rem;">
-            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        <h2 style="font-family:'Outfit', sans-serif; font-size:1.6rem; font-weight:700;">Place Water Refill Request</h2>
+        <a href="{{ url_for('customer.dashboard') }}" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.85rem; font-weight:600;">
+            <i class="fas fa-arrow-left"></i> Dashboard
         </a>
     </div>
 
-    <!-- Check if profile needs details -->
+    <!-- Alert for empty profile details -->
     {% if not customer.address or not customer.phone %}
-    <div style="background: rgba(239, 83, 80, 0.1); border: 1px solid rgba(239, 83, 80, 0.2); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 2rem; color: #ef9a9a; display: flex; gap: 15px; align-items: flex-start;">
-        <i class="fas fa-exclamation-triangle" style="font-size: 1.2rem; margin-top: 2px;"></i>
+    <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 2rem; color: #fecaca; display: flex; gap: 15px; align-items: flex-start; line-height: 1.5;">
+        <i class="fas fa-exclamation-triangle" style="font-size: 1.3rem; margin-top: 2px; color: var(--accent-red);"></i>
         <div>
-            <strong style="display:block; margin-bottom:4px;">Delivery Information Required</strong>
-            <span style="font-size:0.85rem; line-height:1.4;">Before placing an order, you must provide a valid delivery address and contact phone number. Please update your profile now.</span>
-            <a href="{{ url_for('customer.profile') }}" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem; margin-top: 10px; border-radius:var(--radius-sm)">
-                Update Profile
+            <strong style="font-family:'Outfit', sans-serif; font-size:1.05rem; display:block; margin-bottom:4px; color: #fff;">Incomplete Delivery Details</strong>
+            <span style="font-size:0.88rem; color:var(--text-secondary);">You must configure your delivery address and contact phone number before placing a refill request. Please complete your profile.</span>
+            <a href="{{ url_for('customer.profile') }}" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.82rem; margin-top: 12px; border-radius: var(--radius-sm);">
+                Configure Profile
             </a>
         </div>
     </div>
     {% endif %}
 
-    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem;">
+    <div class="order-card">
         <form action="{{ url_for('customer.place_order') }}" method="POST" id="order-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             
-            <h3 style="font-size: 1.1rem; margin-bottom: 1.5rem; color: var(--text-primary);">Select Refills</h3>
+            <h3 style="font-family:'Outfit', sans-serif; font-size: 1.15rem; font-weight:700; margin-bottom: 2rem; color: var(--text-primary); text-transform:uppercase; letter-spacing:0.5px;">Select Refill Quantities</h3>
             
             <!-- Products List -->
-            <div style="display:flex; flex-direction:column; gap: 1.5rem; margin-bottom: 2rem;">
+            <div style="display:flex; flex-direction:column; gap: 2rem; margin-bottom: 2.5rem;">
                 {% for product in products %}
-                <div class="product-selection-row" style="display:flex; justify-content:space-between; align-items:center; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-color);" data-price="{{ product.price }}" data-id="{{ product.id }}">
-                    <div style="flex:1; padding-right:1rem;">
-                        <h4 style="font-size: 1rem; color: var(--text-primary); margin-bottom: 4px;">{{ product.name }}</h4>
-                        <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">{{ product.description }}</p>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom: 1.75rem; border-bottom: 1px solid var(--border-color);">
+                    <div style="flex:1; padding-right:1.5rem;">
+                        <h4 style="font-family:'Outfit', sans-serif; font-size: 1.1rem; color: var(--text-primary); margin-bottom: 6px; font-weight:700;">{{ product.name }}</h4>
+                        <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5;">{{ product.description }}</p>
                     </div>
                     
-                    <div style="display:flex; align-items:center; gap: 1.5rem;">
-                        <span style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary);">&#8369;{{ "%.2f"|format(product.price) }}</span>
+                    <div style="display:flex; align-items:center; gap: 2rem; flex-shrink:0;">
+                        <span style="font-family:'Outfit', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--accent-blue);">&#8369;{{ "%.2f"|format(product.price) }}</span>
                         
-                        <!-- Qty Input group -->
-                        <div style="display:flex; align-items:center; border: 1px solid var(--border-color); border-radius: var(--radius-sm); overflow:hidden;">
-                            <button type="button" class="qty-btn qty-minus" style="padding: 8px 12px; background: rgba(255,255,255,0.02); color: var(--text-primary); border: none; cursor:pointer;" onclick="adjustQty({{ product.id }}, -1)">-</button>
-                            <input type="number" name="qty_{{ product.id }}" id="qty-input-{{ product.id }}" value="0" min="0" max="99" style="width: 50px; text-align:center; background:none; color: var(--text-primary); border: none; font-weight:600; -moz-appearance: textfield;" readonly>
-                            <button type="button" class="qty-btn qty-plus" style="padding: 8px 12px; background: rgba(255,255,255,0.02); color: var(--text-primary); border: none; cursor:pointer;" onclick="adjustQty({{ product.id }}, 1)">+</button>
+                        <!-- Quantity picker -->
+                        <div style="display:flex; align-items:center; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 30px; padding: 4px;">
+                            <button type="button" class="qty-btn" onclick="adjustQty({{ product.id }}, -1)"><i class="fas fa-minus" style="font-size:0.75rem"></i></button>
+                            <input type="number" name="qty_{{ product.id }}" id="qty-input-{{ product.id }}" value="0" min="0" max="99" style="width: 48px; text-align:center; background:none; color: var(--text-primary); border: none; font-size:0.95rem; font-weight:700; -moz-appearance: textfield; outline:none;" readonly>
+                            <button type="button" class="qty-btn" onclick="adjustQty({{ product.id }}, 1)"><i class="fas fa-plus" style="font-size:0.75rem"></i></button>
                         </div>
                     </div>
                 </div>
@@ -56,23 +132,23 @@
             </div>
             
             <!-- Notes -->
-            <div style="margin-bottom: 2rem;">
-                <label for="notes" style="display:block; font-size: 0.85rem; color: var(--text-secondary); font-weight:600; margin-bottom: 8px;">Delivery Notes / Instructions:</label>
-                <textarea name="notes" id="notes" rows="3" placeholder="e.g. Leave by the blue gate, call before arriving..." style="width:100%; padding:12px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary); font-family:inherit; font-size: 0.9rem; resize:vertical; outline:none; transition:var(--transition);"></textarea>
+            <div style="margin-bottom: 2.5rem;">
+                <label for="notes" style="display:block; font-size: 0.85rem; color: var(--text-secondary); font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom: 10px;">Delivery Notes / Gate Code / Landmarks:</label>
+                <textarea name="notes" id="notes" rows="3" placeholder="e.g. Leave in front of the gate, call upon arrival, house is near the barangay hall..." style="width:100%; min-height:85px;"></textarea>
             </div>
             
             <!-- Summary Box -->
-            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 2rem; display:flex; justify-content:space-between; align-items:center;">
+            <div class="total-box">
                 <div>
-                    <span style="font-size:0.8rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Estimated Total Amount</span>
+                    <span style="font-size:0.78rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; font-weight:700;">Est. Checkout Total</span>
                 </div>
                 <div>
-                    <span id="order-total" style="font-size: 1.8rem; font-weight: 800; color: var(--accent-blue);">&#8369;0.00</span>
+                    <span id="order-total" style="font-family:'Outfit', sans-serif; font-size: 2rem; font-weight: 800; color: var(--accent-blue);">&#8369;0.00</span>
                 </div>
             </div>
             
-            <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;" {% if not customer.address or not customer.phone %}disabled style="opacity: 0.5; cursor: not-allowed;"{% endif %}>
-                <i class="fas fa-check-circle"></i> Confirm Order Refill
+            <button type="submit" class="btn btn-submit-refill" {% if not customer.address or not customer.phone %}disabled style="opacity: 0.4; cursor: not-allowed; box-shadow:none;"{% endif %}>
+                <i class="fas fa-paper-plane"></i> Dispatch Refill Request
             </button>
         </form>
     </div>

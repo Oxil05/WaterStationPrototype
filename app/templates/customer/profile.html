@@ -3,47 +3,99 @@
 {% block title %}Edit Profile{% endblock %}
 {% block page_title %}Delivery Profile{% endblock %}
 
+{% block head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    .profile-card {
+        background: var(--bg-card);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 3rem 2.5rem;
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .btn-save-profile {
+        background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-blue-dark) 100%);
+        color: white;
+        font-weight: 700;
+        font-family: 'Outfit', sans-serif;
+        box-shadow: 0 4px 15px rgba(6, 182, 212, 0.25);
+        width: 100%;
+        height: 50px;
+        font-size: 1rem;
+        border-radius: var(--radius-md);
+        border: none;
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+    
+    .btn-save-profile:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 22px rgba(6, 182, 212, 0.45);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div style="max-width: 600px; margin: 0 auto;">
+<div style="max-width: 620px; margin: 0 auto;">
     <div class="section-header">
-        <h2>Edit Delivery Profile</h2>
-        <a href="{{ url_for('customer.dashboard') }}" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.85rem;">
-            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        <h2 style="font-family:'Outfit', sans-serif; font-size:1.6rem; font-weight:700;">Edit Delivery Profile</h2>
+        <a href="{{ url_for('customer.dashboard') }}" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.85rem; font-weight:600;">
+            <i class="fas fa-arrow-left"></i> Dashboard
         </a>
     </div>
 
-    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem;">
+    <div class="profile-card">
         <form action="{{ url_for('customer.profile') }}" method="POST">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             
-            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.5;">
-                Please ensure your contact and location details are accurate. Our delivery personnel use this information to reach your home in Bancal and surrounding areas in Meycauayan.
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 2rem; line-height: 1.6; border-left: 2px solid var(--accent-blue); padding-left: 12px;">
+                Your shipping details are mapped to our Bancal delivery routes. Please ensure contact details are up to date so our drivers can coordinate with you quickly.
             </p>
             
             <!-- Full Name -->
-            <div style="margin-bottom: 1.5rem;">
-                <label for="full_name" style="display:block; font-size: 0.85rem; color: var(--text-secondary); font-weight:600; margin-bottom: 8px;">Recipient Full Name:</label>
-                <input type="text" name="full_name" id="full_name" value="{{ customer.full_name }}" required placeholder="e.g. Maria Clara" style="width:100%; padding:12px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary); font-family:inherit; font-size: 0.95rem; outline:none; transition:var(--transition);">
+            <div class="form-group">
+                <label for="full_name" style="display:block; font-size: 0.82rem; color: var(--text-secondary); font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom: 10px;">Recipient Name:</label>
+                <input type="text" name="full_name" id="full_name" value="{{ customer.full_name }}" required placeholder="e.g. Juan Dela Cruz">
             </div>
             
-            <!-- Phone Number -->
-            <div style="margin-bottom: 1.5rem;">
-                <label for="phone" style="display:block; font-size: 0.85rem; color: var(--text-secondary); font-weight:600; margin-bottom: 8px;">Contact Phone Number:</label>
-                <input type="text" name="phone" id="phone" value="{{ customer.phone or '' }}" placeholder="e.g. 09171234567" style="width:100%; padding:12px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary); font-family:inherit; font-size: 0.95rem; outline:none; transition:var(--transition);">
-                <span style="font-size:0.75rem; color:var(--text-muted); display:block; margin-top:5px;">We will call or text this number to coordinate delivery arrival.</span>
+            <!-- Phone -->
+            <div class="form-group">
+                <label for="phone" style="display:block; font-size: 0.82rem; color: var(--text-secondary); font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom: 10px;">Contact Number:</label>
+                <input type="text" name="phone" id="phone" value="{{ customer.phone or '' }}" placeholder="e.g. 09171234567">
+                <span style="font-size:0.75rem; color:var(--text-muted); display:block; margin-top:6px; line-height:1.4;">Used by the delivery crew to send SMS arrival alerts or call for instructions.</span>
             </div>
             
-            <!-- Delivery Address -->
-            <div style="margin-bottom: 2rem;">
-                <label for="address" style="display:block; font-size: 0.85rem; color: var(--text-secondary); font-weight:600; margin-bottom: 8px;">Delivery Address:</label>
-                <textarea name="address" id="address" rows="4" required placeholder="e.g. 123 Sampaguita Street, Bancal, Meycauayan City, Bulacan" style="width:100%; padding:12px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary); font-family:inherit; font-size: 0.95rem; resize:vertical; outline:none; transition:var(--transition);">{{ customer.address or '' }}</textarea>
-                <span style="font-size:0.75rem; color:var(--text-muted); display:block; margin-top:5px;">Specify house number, street name, subdivision, and landmarks to speed up shipping.</span>
+            <!-- Address -->
+            <div class="form-group" style="margin-bottom: 2.5rem;">
+                <label for="address" style="display:block; font-size: 0.82rem; color: var(--text-secondary); font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom: 10px;">Full Shipping Address:</label>
+                <textarea name="address" id="address" rows="4" required placeholder="e.g. Block 1 Lot 2, Phase 3 St. Jude Subdivision, Bancal, Meycauayan City, Bulacan" style="min-height:90px; line-height:1.5; resize:vertical;"></textarea>
+                <span style="font-size:0.75rem; color:var(--text-muted); display:block; margin-top:6px; line-height:1.4;">Provide block/lot, street name, landmarks (e.g. behind Bancal Elementary School) to accelerate deliveries.</span>
             </div>
             
-            <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">
+            <button type="submit" class="btn btn-save-profile">
                 <i class="fas fa-save"></i> Save Profile Details
             </button>
         </form>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Pre-fill text area correctly without leading/trailing space problems
+        const txtArea = document.getElementById('address');
+        const dbAddress = "{{ customer.address or '' }}";
+        txtArea.value = dbAddress.replace(/&#39;/g, "'").replace(/&quot;/g, '"');
+    });
+</script>
 {% endblock %}

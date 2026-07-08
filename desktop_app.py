@@ -29,6 +29,7 @@ class WaterStationApp(ctk.CTk):
         self.title("AquaFlow - Mineral Water Station POS & AI Console")
         self.geometry("1100x680")
         self.minsize(1000, 600)
+        self.configure(fg_color="#090d16")
         
         # Verify database connection
         if not os.path.exists(DB_PATH):
@@ -46,7 +47,7 @@ class WaterStationApp(ctk.CTk):
         self.grid_rowconfigure(0, weight=1)
         
         # Sidebar Frame
-        self.sidebar_frame = ctk.CTkFrame(self, width=220, corner_radius=0)
+        self.sidebar_frame = ctk.CTkFrame(self, width=220, corner_radius=0, fg_color="#0d1321")
         self.sidebar_frame.grid(row=0, column=0, sticky="nsew")
         self.sidebar_frame.grid_rowconfigure(6, weight=1)
         
@@ -120,9 +121,9 @@ class WaterStationApp(ctk.CTk):
         buttons = [self.btn_dashboard, self.btn_pos, self.btn_monitor, self.btn_history, self.btn_ai]
         for btn in buttons:
             if btn == active_button:
-                btn.configure(fg_color=["#3b82f6", "#2563eb"], text_color="white")
+                btn.configure(fg_color="#3b82f6", text_color="white")
             else:
-                btn.configure(fg_color="transparent", text_color=["#334155", "#cbd5e1"])
+                btn.configure(fg_color="transparent", text_color="#cbd5e1")
                 
     def get_db_connection(self):
         conn = sqlite3.connect(self.db_path)
@@ -180,7 +181,7 @@ class WaterStationApp(ctk.CTk):
         kpi_frame.pack(fill="x", pady=(0, 20))
         
         # KPI Card 1: Today's Revenue
-        self.kpi_rev = ctk.CTkFrame(kpi_frame, width=220, height=100)
+        self.kpi_rev = ctk.CTkFrame(kpi_frame, width=220, height=100, fg_color="#131c2e", border_width=1, border_color="#1e293b")
         self.kpi_rev.pack(side="left", expand=True, fill="both", padx=5)
         self.kpi_rev_lbl = ctk.CTkLabel(self.kpi_rev, text="TODAY'S REVENUE", font=ctk.CTkFont(size=10, weight="bold"), text_color="gray")
         self.kpi_rev_lbl.pack(anchor="w", padx=15, pady=(15, 0))
@@ -188,7 +189,7 @@ class WaterStationApp(ctk.CTk):
         self.kpi_rev_val.pack(anchor="w", padx=15, pady=(5, 15))
         
         # KPI Card 2: Pending Orders
-        self.kpi_orders = ctk.CTkFrame(kpi_frame, width=220, height=100)
+        self.kpi_orders = ctk.CTkFrame(kpi_frame, width=220, height=100, fg_color="#131c2e", border_width=1, border_color="#1e293b")
         self.kpi_orders.pack(side="left", expand=True, fill="both", padx=5)
         self.kpi_orders_lbl = ctk.CTkLabel(self.kpi_orders, text="PENDING WEB ORDERS", font=ctk.CTkFont(size=10, weight="bold"), text_color="gray")
         self.kpi_orders_lbl.pack(anchor="w", padx=15, pady=(15, 0))
@@ -196,7 +197,7 @@ class WaterStationApp(ctk.CTk):
         self.kpi_orders_val.pack(anchor="w", padx=15, pady=(5, 15))
         
         # KPI Card 3: Stock Status
-        self.kpi_stock = ctk.CTkFrame(kpi_frame, width=220, height=100)
+        self.kpi_stock = ctk.CTkFrame(kpi_frame, width=220, height=100, fg_color="#131c2e", border_width=1, border_color="#1e293b")
         self.kpi_stock.pack(side="left", expand=True, fill="both", padx=5)
         self.kpi_stock_lbl = ctk.CTkLabel(self.kpi_stock, text="LOW INVENTORY ALERTS", font=ctk.CTkFont(size=10, weight="bold"), text_color="gray")
         self.kpi_stock_lbl.pack(anchor="w", padx=15, pady=(15, 0))
@@ -208,7 +209,7 @@ class WaterStationApp(ctk.CTk):
         split_frame.pack(fill="both", expand=True)
         
         # Weather Display Box (Left)
-        weather_box = ctk.CTkFrame(split_frame, width=300)
+        weather_box = ctk.CTkFrame(split_frame, width=300, fg_color="#131c2e", border_width=1, border_color="#1e293b")
         weather_box.pack(side="left", fill="both", expand=False, padx=(0, 10))
         
         w_lbl = ctk.CTkLabel(weather_box, text="LIVE WEATHER (MEYCAUAYAN)", font=ctk.CTkFont(size=11, weight="bold"), text_color="gray")
@@ -234,14 +235,20 @@ class WaterStationApp(ctk.CTk):
         stock_header = ctk.CTkLabel(weather_box, text="CURRENT STOCK LEVELS", font=ctk.CTkFont(size=11, weight="bold"), text_color="gray")
         stock_header.pack(anchor="w", padx=15, pady=(15, 5))
         
-        self.dash_stock_round = ctk.CTkLabel(weather_box, text="Round Container: --", font=ctk.CTkFont(size=12))
-        self.dash_stock_round.pack(anchor="w", padx=15, pady=2)
+        self.dash_stock_round_lbl = ctk.CTkLabel(weather_box, text="Round Blue: --/500 units", font=ctk.CTkFont(size=11, weight="bold"))
+        self.dash_stock_round_lbl.pack(anchor="w", padx=15, pady=(5, 2))
         
-        self.dash_stock_slim = ctk.CTkLabel(weather_box, text="Slim Blue: --", font=ctk.CTkFont(size=12))
-        self.dash_stock_slim.pack(anchor="w", padx=15, pady=2)
+        self.dash_stock_round_progress = ctk.CTkProgressBar(weather_box, width=260, height=8)
+        self.dash_stock_round_progress.pack(anchor="w", padx=15, pady=(0, 10))
+        
+        self.dash_stock_slim_lbl = ctk.CTkLabel(weather_box, text="Slim Blue: --/300 units", font=ctk.CTkFont(size=11, weight="bold"))
+        self.dash_stock_slim_lbl.pack(anchor="w", padx=15, pady=(5, 2))
+        
+        self.dash_stock_slim_progress = ctk.CTkProgressBar(weather_box, width=260, height=8)
+        self.dash_stock_slim_progress.pack(anchor="w", padx=15, pady=(0, 15))
         
         # Recent Completed Sales Table (Right)
-        sales_box = ctk.CTkFrame(split_frame)
+        sales_box = ctk.CTkFrame(split_frame, fg_color="#131c2e", border_width=1, border_color="#1e293b")
         sales_box.pack(side="right", fill="both", expand=True, padx=(10, 0))
         
         sales_lbl = ctk.CTkLabel(sales_box, text="RECENT REGISTERED TRANSACTIONS", font=ctk.CTkFont(size=11, weight="bold"), text_color="gray")
@@ -300,9 +307,25 @@ class WaterStationApp(ctk.CTk):
             if qty < 50:
                 low_stock += 1
             if 'Round' in p['name']:
-                self.dash_stock_round.configure(text=f"Round Container: {qty} units")
+                self.dash_stock_round_lbl.configure(text=f"Round Blue: {qty}/500 units")
+                prog = max(0.0, min(float(qty) / 500.0, 1.0))
+                self.dash_stock_round_progress.set(prog)
+                if prog < 0.15:
+                    self.dash_stock_round_progress.configure(progress_color="#ef4444") # Red
+                elif prog < 0.4:
+                    self.dash_stock_round_progress.configure(progress_color="#f59e0b") # Orange
+                else:
+                    self.dash_stock_round_progress.configure(progress_color="#06b6d4") # Cyan
             else:
-                self.dash_stock_slim.configure(text=f"Slim Blue Gallon: {qty} units")
+                self.dash_stock_slim_lbl.configure(text=f"Slim Blue: {qty}/300 units")
+                prog = max(0.0, min(float(qty) / 300.0, 1.0))
+                self.dash_stock_slim_progress.set(prog)
+                if prog < 0.15:
+                    self.dash_stock_slim_progress.configure(progress_color="#ef4444")
+                elif prog < 0.4:
+                    self.dash_stock_slim_progress.configure(progress_color="#f59e0b")
+                else:
+                    self.dash_stock_slim_progress.configure(progress_color="#3b82f6") # Blue
                 
         if low_stock > 0:
             self.kpi_stock_val.configure(text=f"{low_stock} WARNINGS", text_color="#ef4444")
@@ -356,7 +379,7 @@ class WaterStationApp(ctk.CTk):
         view.grid_columnconfigure(1, weight=1)
         
         # Left Panel: POS inputs
-        left_panel = ctk.CTkFrame(view)
+        left_panel = ctk.CTkFrame(view, fg_color="#131c2e", border_width=1, border_color="#1e293b")
         left_panel.grid(row=0, column=0, sticky="nsew", padx=(0, 10), pady=10)
         
         lbl_pos_title = ctk.CTkLabel(left_panel, text="New Sales Transaction", font=ctk.CTkFont(size=18, weight="bold"))
@@ -396,7 +419,7 @@ class WaterStationApp(ctk.CTk):
         self.pos_notes.pack(anchor="w", padx=20, pady=(0, 20))
         
         # Right Panel: Sales Receipt / Checkout Summary
-        right_panel = ctk.CTkFrame(view)
+        right_panel = ctk.CTkFrame(view, fg_color="#131c2e", border_width=1, border_color="#1e293b")
         right_panel.grid(row=0, column=1, sticky="nsew", padx=(10, 0), pady=10)
         
         lbl_summary_title = ctk.CTkLabel(right_panel, text="Checkout Summary", font=ctk.CTkFont(size=18, weight="bold"))
@@ -636,7 +659,7 @@ class WaterStationApp(ctk.CTk):
         monitor_main.grid_rowconfigure(0, weight=1)
         
         # Tree list of active orders
-        list_box = ctk.CTkFrame(monitor_main)
+        list_box = ctk.CTkFrame(monitor_main, fg_color="#131c2e", border_width=1, border_color="#1e293b")
         list_box.grid(row=0, column=0, sticky="nsew", padx=(10, 5), pady=10)
         
         self.mon_tree = self.create_custom_tree(
@@ -648,7 +671,7 @@ class WaterStationApp(ctk.CTk):
         self.mon_tree.bind("<<TreeviewSelect>>", self.on_monitor_order_select)
         
         # Details & Action Panel (Right)
-        self.details_panel = ctk.CTkFrame(monitor_main)
+        self.details_panel = ctk.CTkFrame(monitor_main, fg_color="#131c2e", border_width=1, border_color="#1e293b")
         self.details_panel.grid(row=0, column=1, sticky="nsew", padx=(5, 10), pady=10)
         
         self.lbl_details_title = ctk.CTkLabel(self.details_panel, text="Order Details", font=ctk.CTkFont(size=15, weight="bold"))
@@ -910,7 +933,7 @@ class WaterStationApp(ctk.CTk):
         view.grid_rowconfigure(1, weight=1)
         
         # Filters toolbar
-        toolbar = ctk.CTkFrame(view)
+        toolbar = ctk.CTkFrame(view, fg_color="#131c2e", border_width=1, border_color="#1e293b")
         toolbar.grid(row=0, column=0, sticky="ew", pady=(0, 10))
         
         lbl_search = ctk.CTkLabel(toolbar, text="Search Customer Name:", font=ctk.CTkFont(size=11, weight="bold"))
@@ -931,7 +954,7 @@ class WaterStationApp(ctk.CTk):
         self.hist_status_filter.set("ALL")
         
         # History table container
-        table_container = ctk.CTkFrame(view)
+        table_container = ctk.CTkFrame(view, fg_color="#131c2e", border_width=1, border_color="#1e293b")
         table_container.grid(row=1, column=0, sticky="nsew", pady=10)
         
         self.hist_tree = self.create_custom_tree(
@@ -1002,7 +1025,7 @@ class WaterStationApp(ctk.CTk):
         view.grid_rowconfigure(0, weight=1)
         
         # Left Panel: Customer Refill Predictions
-        refill_panel = ctk.CTkFrame(view)
+        refill_panel = ctk.CTkFrame(view, fg_color="#131c2e", border_width=1, border_color="#1e293b")
         refill_panel.grid(row=0, column=0, sticky="nsew", padx=(0, 10), pady=10)
         
         lbl_ai_c = ctk.CTkLabel(refill_panel, text="AI Customer Refill Scheduler", font=ctk.CTkFont(size=16, weight="bold"))
@@ -1025,7 +1048,7 @@ class WaterStationApp(ctk.CTk):
         self.refill_tree.bind("<<TreeviewSelect>>", self.on_refill_customer_select)
         
         # Right Panel: 7-Day Demand Forecasting Chart
-        self.forecast_panel = ctk.CTkFrame(view)
+        self.forecast_panel = ctk.CTkFrame(view, fg_color="#131c2e", border_width=1, border_color="#1e293b")
         self.forecast_panel.grid(row=0, column=1, sticky="nsew", padx=(10, 0), pady=10)
         
         lbl_ai_f = ctk.CTkLabel(self.forecast_panel, text="7-Day Weather-Integrated Demand Forecast", font=ctk.CTkFont(size=16, weight="bold"))
@@ -1074,9 +1097,9 @@ class WaterStationApp(ctk.CTk):
         temps = [f["max_temp"] for f in forecasts]
         
         # Create matplotlib figure
-        fig = Figure(figsize=(5, 4), dpi=100, facecolor="#161b22")
+        fig = Figure(figsize=(5, 4), dpi=100, facecolor="#131c2e")
         ax1 = fig.add_subplot(111)
-        ax1.set_facecolor("#161b22")
+        ax1.set_facecolor("#131c2e")
         
         # Hide top and right spines
         ax1.spines['top'].set_visible(False)
@@ -1102,12 +1125,12 @@ class WaterStationApp(ctk.CTk):
         ax2.tick_params(axis='y', labelcolor='#ef4444', colors='#cbd5e1')
         
         # Add grid lines
-        ax1.grid(True, color='rgba(255, 255, 255, 0.05)', linestyle=':')
+        ax1.grid(True, color='#ffffff', alpha=0.05, linestyle=':')
         
         # Combine labels for legend
         lines = line1 + line2
         labels = [l.get_label() for l in lines]
-        ax1.legend(lines, labels, loc='upper left', facecolor='#161b22', edgecolor='none', labelcolor='white')
+        ax1.legend(lines, labels, loc='upper left', facecolor='#131c2e', edgecolor='none', labelcolor='white')
         
         fig.tight_layout()
         
@@ -1145,23 +1168,23 @@ class WaterStationApp(ctk.CTk):
         
         style.configure(
             "Treeview",
-            background="#1e293b",
-            foreground="#f8fafc",
-            rowheight=26,
-            fieldbackground="#1e293b",
+            background="#131c2e",
+            foreground="#f1f5f9",
+            rowheight=30,
+            fieldbackground="#131c2e",
             borderwidth=0
         )
         style.map(
             "Treeview",
-            background=[("selected", "#2563eb")],
+            background=[("selected", "#3b82f6")],
             foreground=[("selected", "#ffffff")]
         )
         
         style.configure(
             "Treeview.Heading",
-            background="#0f172a",
+            background="#0d1321",
             foreground="#cbd5e1",
-            font=("Inter", 9, "bold"),
+            font=("Outfit", 9, "bold"),
             borderwidth=0
         )
         
