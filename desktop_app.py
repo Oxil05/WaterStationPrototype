@@ -265,75 +265,7 @@ class WaterStationApp(ctk.CTk):
             
             self.show_login_screen()
 
-    # ==========================================
-    # ASYNC THREAD LOADING INDICATOR
-    # ==========================================
-    def create_loading_overlay(self):
-        """Creates the loading overlay container (initially hidden)."""
-        self.loading_frame = ctk.CTkFrame(self.main_container, fg_color="#090d16", corner_radius=12)
-        
-        # Center panel
-        center_panel = ctk.CTkFrame(self.loading_frame, width=420, height=220, fg_color="#131c2e", border_width=1, border_color="#1e293b", corner_radius=16)
-        center_panel.place(relx=0.5, rely=0.5, anchor="center")
-        
-        # Logo inside loader
-        if self.logo_img:
-            l_lbl = ctk.CTkLabel(center_panel, image=self.logo_img, text="")
-            l_lbl.pack(pady=(20, 10))
-        else:
-            l_lbl = ctk.CTkLabel(center_panel, text="🔹", font=ctk.CTkFont(size=24))
-            l_lbl.pack(pady=(20, 10))
-            
-        self.loading_msg_label = ctk.CTkLabel(
-            center_panel, 
-            text="Querying database records...", 
-            font=ctk.CTkFont(family="Plus Jakarta Sans", size=13, weight="semibold"),
-            text_color="#cbd5e1"
-        )
-        self.loading_msg_label.pack(pady=5)
-        
-        # Indeterminate glow progress bar
-        self.loading_progress = ctk.CTkProgressBar(center_panel, width=280, height=6, progress_color="#06b6d4")
-        self.loading_progress.configure(mode="indeterminate")
-        self.loading_progress.pack(pady=(15, 20))
-        
-    def start_async_task(self, data_fetch_fn, ui_update_fn, loading_msg, view_name):
-        """
-        Spawns a background thread to fetch data/train AI models, preventing UI freeze.
-        Shows loading overlay during execution.
-        """
-        # Show loading overlay
-        self.loading_msg_label.configure(text=loading_msg)
-        self.loading_frame.grid(row=0, column=0, sticky="nsew", zorder=999) # cover main content area
-        self.loading_progress.start()
-        self.update()
-        
-        def worker():
-            try:
-                # Execute long calculations / db reads in background
-                data = data_fetch_fn()
-                # Safely execute UI updates in Tkinter main thread
-                self.after(0, lambda: self.finish_async_task(ui_update_fn, data, view_name))
-            except Exception as e:
-                self.after(0, lambda: self.handle_async_error(e))
-                
-        threading.Thread(target=worker, daemon=True).start()
-        
-    def finish_async_task(self, ui_update_fn, data, view_name):
-        # Stop loader and hide overlay
-        self.loading_progress.stop()
-        self.loading_frame.grid_forget()
-        
-        # Reveal the targeted view frame
-        self.show_view(view_name)
-        
-        # Update widgets with data
-        ui_update_fn(data)
-        
-    def handle_async_error(self, error):
-        self.loading_progress.stop()
-        self.loading_frame.grid_forget()
-        messagebox.showerror("System Error", f"Asynchronous processing failed:\n\n{error}")
+
 
     # ==========================================
     # MAIN LAYOUT INITIALIZATION
@@ -414,8 +346,7 @@ class WaterStationApp(ctk.CTk):
         self.create_history_view()
         self.create_ai_view()
         
-        # Create asynchronous loading overlay frame
-        self.create_loading_overlay()
+
         
     def select_sidebar_button(self, active_button):
         buttons = [self.btn_dashboard, self.btn_pos, self.btn_monitor, self.btn_history, self.btn_ai]
@@ -433,12 +364,14 @@ class WaterStationApp(ctk.CTk):
                 view_frame.grid_forget()
 
     # ==========================================
-    # NAVIGATION HANDLERS (THREADED ASYNC)
+    # NAVIGATION HANDLERS (SYNCHRONOUS WITH CURSOR LOADER)
     # ==========================================
     def show_dashboard(self):
         self.select_sidebar_button(self.btn_dashboard)
+        self.configure(cursor="watch")
+        self.update_idletasks()
         
-        def fetch_data():
+        try:
             conn = self.get_db_connection()
             cursor = conn.cursor()
             
@@ -467,29 +400,20 @@ class WaterStationApp(ctk.CTk):
                 LIMIT 6
             """)
             recent_txs = cursor.fetchall()
-            
             conn.close()
             
             # Live Weather forecast
             weather = get_weather_forecast()
             
-            return {
-                'rev': todays_rev,
-                'pending': pending_count,
-                'products': products,
-                'recent': recent_txs,
-                'weather': weather
-            }
-            
-        def update_ui(data):
-            self.kpi_rev_val.configure(text=f"₱{data['rev']:,.2f}")
-            self.kpi_orders_val.configure(text=str(data['pending']))
+            # Update UI
+            self.kpi_rev_val.configure(text=f"₱{todays_rev:,.2f}")
+            self.kpi_orders_val.configure(text=str(pending_count))
             
             # Update Weather panel
-            self.dash_weather_temp.configure(text=f"{data['weather']['current_temp']}°C")
-            self.dash_weather_desc.configure(text=data['weather']['current_condition'])
+            self.dash_weather_temp.configure(text=f"{weather['current_temp']}°C")
+            self.dash_weather_desc.configure(text=weather['current_condition'])
             
-            if data['weather']['current_temp'] >= 32.5:
+            if weather['current_temp'] >= 32.5:
                 self.dash_weather_tips.configure(
                     text="⚠️ Heatwave condition: AI predicts a spike in drinking water demand. Keep inventory topped up!",
                     text_color="#ffa726"
@@ -502,7 +426,7 @@ class WaterStationApp(ctk.CTk):
                 
             # Update stock meters & warnings
             low_stock = 0
-            for p in data['products']:
+            for p in products:
                 qty = p['stock_quantity']
                 if qty < 50:
                     low_stock += 1
@@ -529,7 +453,7 @@ class WaterStationApp(ctk.CTk):
             # Populate recent transactions tree
             for item in self.dash_tree.get_children():
                 self.dash_tree.delete(item)
-            for tx in data['recent']:
+            for tx in recent_txs:
                 try:
                     dt = datetime.fromisoformat(tx['order_date'].replace('Z', '+00:00'))
                     dt_str = dt.strftime('%b %d, %H:%M')
@@ -540,20 +464,24 @@ class WaterStationApp(ctk.CTk):
                     values=(f"#{tx['id']}", tx['full_name'], f"₱{tx['total_amount']:.2f}", tx['status'].capitalize(), dt_str)
                 )
                 
-        self.start_async_task(fetch_data, update_ui, "Reloading command dashboard metrics...", "dashboard")
-        
+            self.show_view("dashboard")
+        except Exception as e:
+            messagebox.showerror("Dashboard Error", f"Failed to load dashboard data: {e}")
+        finally:
+            self.configure(cursor="")
+
     def show_pos(self):
         self.select_sidebar_button(self.btn_pos)
+        self.configure(cursor="watch")
+        self.update_idletasks()
         
-        def fetch_data():
+        try:
             conn = self.get_db_connection()
             cursor = conn.cursor()
             cursor.execute("SELECT id, full_name FROM customers WHERE is_active = 1")
-            rows = cursor.fetchall()
+            data = cursor.fetchall()
             conn.close()
-            return rows
             
-        def update_ui(data):
             self.pos_customers_data = {}
             dropdown_vals = []
             for r in data:
@@ -566,12 +494,18 @@ class WaterStationApp(ctk.CTk):
                 self.pos_customer_dropdown.set(dropdown_vals[0])
             self.reset_pos_fields()
             
-        self.start_async_task(fetch_data, update_ui, "Syncing customer profiles...", "pos")
-        
+            self.show_view("pos")
+        except Exception as e:
+            messagebox.showerror("POS Error", f"Failed to sync customer profiles: {e}")
+        finally:
+            self.configure(cursor="")
+
     def show_monitor(self):
         self.select_sidebar_button(self.btn_monitor)
+        self.configure(cursor="watch")
+        self.update_idletasks()
         
-        def fetch_data():
+        try:
             conn = self.get_db_connection()
             cursor = conn.cursor()
             cursor.execute("""
@@ -581,11 +515,9 @@ class WaterStationApp(ctk.CTk):
                 WHERE o.status IN ('pending', 'confirmed')
                 ORDER BY o.id DESC
             """)
-            rows = cursor.fetchall()
+            data = cursor.fetchall()
             conn.close()
-            return rows
             
-        def update_ui(data):
             for item in self.mon_tree.get_children():
                 self.mon_tree.delete(item)
             for r in data:
@@ -600,42 +532,50 @@ class WaterStationApp(ctk.CTk):
             self.mon_details_text.configure(state="disabled")
             self.disable_monitor_actions()
             
-        self.start_async_task(fetch_data, update_ui, "Polling incoming web order queues...", "monitor")
-        
+            self.show_view("monitor")
+        except Exception as e:
+            messagebox.showerror("Monitor Error", f"Failed to poll web order queue: {e}")
+        finally:
+            self.configure(cursor="")
+
     def show_history(self):
         self.select_sidebar_button(self.btn_history)
-        self.refresh_history_data() # history uses built-in filter query
-        
+        self.configure(cursor="watch")
+        self.update_idletasks()
+        try:
+            self.refresh_history_data()
+            self.show_view("history")
+        finally:
+            self.configure(cursor="")
+
     def show_ai(self):
         self.select_sidebar_button(self.btn_ai)
+        self.configure(cursor="watch")
+        self.update_idletasks()
         
-        def fetch_data():
+        try:
             # Run customer refill interval cycles
             refills = predict_customer_refills(self.db_path)
             # Train model and run 7-day water demand forecasting
             forecasts = forecast_water_demand(self.db_path)
-            return {'refills': refills, 'forecasts': forecasts}
             
-        def update_ui(data):
             # Populate refills tree
             for item in self.refill_tree.get_children():
                 self.refill_tree.delete(item)
-            for r in data['refills']:
+            for r in refills:
                 self.refill_tree.insert(
                     "", "end",
                     values=(r['name'], r['last_order_date'], r['predicted_refill_date'], f"{r['avg_interval']} days", r['status'])
                 )
             # Plot regression demand curve
-            self.draw_forecast_chart(data['forecasts'])
+            self.draw_forecast_chart(forecasts)
             
-        self.start_async_task(
-            fetch_data, update_ui, 
-            "AI is running regression calculations & demand forecasts...", "ai"
-        )
+            self.show_view("ai")
+        except Exception as e:
+            messagebox.showerror("AI Error", f"Failed to calculate AI predictions: {e}")
+        finally:
+            self.configure(cursor="")
 
-    # ==========================================
-    # VIEW CREATION SCHEMAS
-    # ==========================================
     def create_dashboard_view(self):
         view = ctk.CTkFrame(self.main_container, fg_color="transparent")
         self.views["dashboard"] = view
