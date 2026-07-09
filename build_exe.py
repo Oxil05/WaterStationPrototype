@@ -36,6 +36,7 @@ def build():
         "--noconsole",
         "--clean",
         "--collect-all", "customtkinter",
+        "--add-data", "assets;assets",
         "--name", "AquaFlow_POS"
     ]
     
