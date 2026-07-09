@@ -395,8 +395,8 @@ class WaterStationApp(ctk.CTk):
         # Bottom controls: User profile & Logout
         self.btn_logout = ctk.CTkButton(
             self.sidebar_frame, text="🔓 Sign Out", anchor="w", 
-            fg_color="transparent", text_color="#ef4444", border_width=1, border_color="rgba(239, 68, 68, 0.2)",
-            hover_color="rgba(239, 68, 68, 0.08)", command=self.process_logout
+            fg_color="transparent", text_color="#ef4444", border_width=1, border_color="#ef4444",
+            hover_color="#271b1d", command=self.process_logout
         )
         self.btn_logout.grid(row=7, column=0, padx=20, pady=15, sticky="ew")
         
