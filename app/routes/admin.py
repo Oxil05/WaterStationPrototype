@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash
+from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from functools import wraps
 from datetime import datetime, timezone
@@ -6,6 +6,7 @@ from app import db
 from app.models.order import Order
 from app.models.customer import Customer
 from app.models.delivery import Delivery
+from app.models.product import Product
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -45,10 +46,33 @@ def dashboard():
     # Recent orders
     recent_orders = Order.query.order_by(Order.order_date.desc()).limit(10).all()
 
+    # Fetch products for price settings
+    products = Product.query.all()
+
     return render_template('admin/dashboard.html',
         today_revenue=today_revenue,
         total_orders=total_orders,
         active_customers=active_customers,
         pending_deliveries=pending_deliveries,
-        recent_orders=recent_orders
+        recent_orders=recent_orders,
+        products=products
     )
+
+
+@admin_bp.route('/update-price/<int:product_id>', methods=['POST'])
+@login_required
+@admin_required
+def update_price(product_id):
+    product = Product.query.get_or_404(product_id)
+    try:
+        new_price = float(request.form.get('price'))
+        if 20.0 <= new_price <= 30.0:
+            product.price = new_price
+            db.session.commit()
+            flash(f'Price for {product.name} updated to ₱{new_price:.2f} successfully.', 'success')
+        else:
+            flash('Error: Price must be between ₱20.00 and ₱30.00.', 'danger')
+    except (TypeError, ValueError):
+        flash('Error: Invalid price input. Enter a valid number.', 'danger')
+        
+    return redirect(url_for('admin.dashboard'))

@@ -324,13 +324,18 @@ class WaterStationApp(ctk.CTk):
         )
         self.btn_ai.grid(row=6, column=0, padx=20, pady=5, sticky="ew")
         
+        self.btn_prices = ctk.CTkButton(
+            self.sidebar_frame, text="Price Settings", anchor="w", command=self.show_prices
+        )
+        self.btn_prices.grid(row=7, column=0, padx=20, pady=5, sticky="ew")
+        
         # Bottom controls: User profile & Logout
         self.btn_logout = ctk.CTkButton(
             self.sidebar_frame, text="🔓 Sign Out", anchor="w", 
             fg_color="transparent", text_color="#ef4444", border_width=1, border_color="#ef4444",
             hover_color="#271b1d", command=self.process_logout
         )
-        self.btn_logout.grid(row=7, column=0, padx=20, pady=15, sticky="ew")
+        self.btn_logout.grid(row=8, column=0, padx=20, pady=15, sticky="ew")
         
         # --- MAIN VIEW CONTAINER ---
         self.main_container = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
@@ -345,11 +350,12 @@ class WaterStationApp(ctk.CTk):
         self.create_monitor_view()
         self.create_history_view()
         self.create_ai_view()
+        self.create_prices_view()
         
 
         
     def select_sidebar_button(self, active_button):
-        buttons = [self.btn_dashboard, self.btn_pos, self.btn_monitor, self.btn_history, self.btn_ai]
+        buttons = [self.btn_dashboard, self.btn_pos, self.btn_monitor, self.btn_history, self.btn_ai, self.btn_prices]
         for btn in buttons:
             if btn == active_button:
                 btn.configure(fg_color="#3b82f6", text_color="white")
@@ -575,6 +581,83 @@ class WaterStationApp(ctk.CTk):
             messagebox.showerror("AI Error", f"Failed to calculate AI predictions: {e}")
         finally:
             self.configure(cursor="")
+
+    def show_prices(self):
+        self.select_sidebar_button(self.btn_prices)
+        self.configure(cursor="watch")
+        self.update_idletasks()
+        
+        try:
+            conn = self.get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT id, name, price FROM products")
+            products = cursor.fetchall()
+            conn.close()
+            
+            # Clear old elements
+            for child in self.prices_list_frame.winfo_children():
+                child.destroy()
+                
+            for p in products:
+                p_id = p['id']
+                p_name = p['name']
+                p_price = p['price']
+                
+                # Card item
+                card = ctk.CTkFrame(self.prices_list_frame, fg_color="#1a2233", border_width=1, border_color="#2b3a55", height=80)
+                card.pack(fill="x", pady=10, padx=5)
+                
+                # Info
+                lbl_name = ctk.CTkLabel(card, text=p_name.split(' (')[0], font=ctk.CTkFont(family="Outfit", size=13, weight="bold"))
+                lbl_name.pack(side="left", padx=20, pady=20)
+                
+                lbl_curr = ctk.CTkLabel(card, text=f"Current: ₱{p_price:.2f}", font=ctk.CTkFont(weight="bold"), text_color="#06b6d4")
+                lbl_curr.pack(side="left", padx=20, pady=20)
+                
+                # Input controls (Pack to the right)
+                input_frame = ctk.CTkFrame(card, fg_color="transparent")
+                input_frame.pack(side="right", padx=20, pady=15)
+                
+                entry = ctk.CTkEntry(input_frame, width=90, placeholder_text="20.0-30.0")
+                entry.insert(0, f"{p_price:.2f}")
+                entry.pack(side="left", padx=5)
+                
+                btn_save = ctk.CTkButton(
+                    input_frame, text="Update Price", width=100, fg_color="#10b981", hover_color="#059669",
+                    font=ctk.CTkFont(family="Outfit", weight="bold"),
+                    command=lambda pid=p_id, ent=entry: self.update_product_price(pid, ent)
+                )
+                btn_save.pack(side="left", padx=5)
+                
+            self.show_view("prices")
+        except Exception as e:
+            messagebox.showerror("Pricing Error", f"Failed to load product prices: {e}")
+        finally:
+            self.configure(cursor="")
+            
+    def update_product_price(self, product_id, entry_widget):
+        val_str = entry_widget.get().strip()
+        try:
+            new_price = float(val_str)
+            if not (20.0 <= new_price <= 30.0):
+                messagebox.showwarning("Pricing Control", "Price must be between ₱20.00 and ₱30.00.")
+                return
+        except ValueError:
+            messagebox.showwarning("Pricing Control", "Please enter a valid decimal number.")
+            return
+            
+        conn = self.get_db_connection()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("UPDATE products SET price = ? WHERE id = ?", (new_price, product_id))
+            conn.commit()
+            messagebox.showinfo("Pricing Settings", "Product price updated successfully!")
+            self.show_prices() # Refresh
+        except Exception as e:
+            conn.rollback()
+            messagebox.showerror("Database Error", f"Failed to save price: {e}")
+        finally:
+            conn.close()
 
     def create_dashboard_view(self):
         view = ctk.CTkFrame(self.main_container, fg_color="transparent")
@@ -1190,6 +1273,28 @@ class WaterStationApp(ctk.CTk):
         
         self.forecast_canvas_frame = ctk.CTkFrame(self.forecast_panel, fg_color="transparent")
         self.forecast_canvas_frame.pack(fill="both", expand=True, padx=15, pady=(0, 15))
+        
+    def create_prices_view(self):
+        view = ctk.CTkFrame(self.main_container, fg_color="transparent")
+        self.views["prices"] = view
+        
+        # Header
+        header = ctk.CTkLabel(view, text="Pricing Settings Manager", font=ctk.CTkFont(family="Outfit", size=22, weight="bold"))
+        header.pack(anchor="w", pady=(0, 10))
+        
+        # Description
+        desc = ctk.CTkLabel(
+            view, 
+            text="Modify container refill rates. Prices must be configured within the business bounds of ₱20.00 to ₱30.00.",
+            font=ctk.CTkFont(size=12),
+            text_color="gray",
+            justify="left"
+        )
+        desc.pack(anchor="w", pady=(0, 20))
+        
+        # Prices Container Panel
+        self.prices_list_frame = ctk.CTkScrollableFrame(view, fg_color="#131c2e", border_width=1, border_color="#1e293b", width=600, height=350)
+        self.prices_list_frame.pack(anchor="w", fill="both", expand=True, pady=10)
         
     def draw_forecast_chart(self, forecasts):
         for child in self.forecast_canvas_frame.winfo_children():
