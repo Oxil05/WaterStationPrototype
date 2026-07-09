@@ -273,8 +273,8 @@ class WaterStationApp(ctk.CTk):
         self.loading_frame = ctk.CTkFrame(self.main_container, fg_color="#090d16", corner_radius=12)
         
         # Center panel
-        center_panel = ctk.CTkFrame(self.loading_frame, fg_color="#131c2e", border_width=1, border_color="#1e293b", corner_radius=16)
-        center_panel.place(relx=0.5, rely=0.5, anchor="center", width=420, height=220)
+        center_panel = ctk.CTkFrame(self.loading_frame, width=420, height=220, fg_color="#131c2e", border_width=1, border_color="#1e293b", corner_radius=16)
+        center_panel.place(relx=0.5, rely=0.5, anchor="center")
         
         # Logo inside loader
         if self.logo_img:
