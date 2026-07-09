@@ -498,13 +498,49 @@ class WaterStationApp(ctk.CTk):
             self.pos_customer_dropdown.configure(values=dropdown_vals)
             if dropdown_vals:
                 self.pos_customer_dropdown.set(dropdown_vals[0])
-            self.reset_pos_fields()
+                self.on_pos_customer_change(dropdown_vals[0])
+            else:
+                self.reset_pos_fields()
             
             self.show_view("pos")
         except Exception as e:
             messagebox.showerror("POS Error", f"Failed to sync customer profiles: {e}")
         finally:
             self.configure(cursor="")
+
+    def on_pos_customer_change(self, customer_name):
+        if not customer_name:
+            self.pos_active_price_round = 25.0
+            self.pos_active_price_slim = 30.0
+            return
+            
+        customer_id = self.pos_customers_data.get(customer_name)
+        if not customer_id:
+            self.pos_active_price_round = 25.0
+            self.pos_active_price_slim = 30.0
+            return
+            
+        try:
+            conn = self.get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT custom_price_round, custom_price_slim FROM customers WHERE id = ?", (customer_id,))
+            row = cursor.fetchone()
+            conn.close()
+            
+            p_round = row['custom_price_round'] if (row and row['custom_price_round'] is not None) else 25.0
+            p_slim = row['custom_price_slim'] if (row and row['custom_price_slim'] is not None) else 30.0
+            
+            self.pos_active_price_round = p_round
+            self.pos_active_price_slim = p_slim
+            
+            r_custom = " [Custom]" if (row and row['custom_price_round'] is not None) else ""
+            s_custom = " [Custom]" if (row and row['custom_price_slim'] is not None) else ""
+            self.prod1_name.configure(text=f"5-Gallon Round Blue Container Refill (₱{p_round:.2f}){r_custom}")
+            self.prod2_name.configure(text=f"5-Gallon Slim Blue Container Refill (₱{p_slim:.2f}){s_custom}")
+            
+            self.recalculate_pos_total()
+        except Exception as e:
+            print("Failed to fetch customer custom rates:", e)
 
     def show_monitor(self):
         self.select_sidebar_button(self.btn_monitor)
@@ -590,72 +626,93 @@ class WaterStationApp(ctk.CTk):
         try:
             conn = self.get_db_connection()
             cursor = conn.cursor()
-            cursor.execute("SELECT id, name, price FROM products")
-            products = cursor.fetchall()
+            cursor.execute("SELECT id, full_name, custom_price_round, custom_price_slim FROM customers WHERE is_active = 1")
+            customers = cursor.fetchall()
             conn.close()
             
             # Clear old elements
             for child in self.prices_list_frame.winfo_children():
                 child.destroy()
                 
-            for p in products:
-                p_id = p['id']
-                p_name = p['name']
-                p_price = p['price']
+            for c in customers:
+                c_id = c['id']
+                c_name = c['full_name']
+                c_round = c['custom_price_round']
+                c_slim = c['custom_price_slim']
                 
                 # Card item
-                card = ctk.CTkFrame(self.prices_list_frame, fg_color="#1a2233", border_width=1, border_color="#2b3a55", height=80)
+                card = ctk.CTkFrame(self.prices_list_frame, fg_color="#1a2233", border_width=1, border_color="#2b3a55", height=110)
                 card.pack(fill="x", pady=10, padx=5)
                 
-                # Info
-                lbl_name = ctk.CTkLabel(card, text=p_name.split(' (')[0], font=ctk.CTkFont(family="Outfit", size=13, weight="bold"))
+                # Customer name label
+                lbl_name = ctk.CTkLabel(card, text=c_name, font=ctk.CTkFont(family="Outfit", size=14, weight="bold"))
                 lbl_name.pack(side="left", padx=20, pady=20)
                 
-                lbl_curr = ctk.CTkLabel(card, text=f"Current: ₱{p_price:.2f}", font=ctk.CTkFont(weight="bold"), text_color="#06b6d4")
-                lbl_curr.pack(side="left", padx=20, pady=20)
-                
-                # Input controls (Pack to the right)
+                # Input controls container (Pack to the right)
                 input_frame = ctk.CTkFrame(card, fg_color="transparent")
                 input_frame.pack(side="right", padx=20, pady=15)
                 
-                entry = ctk.CTkEntry(input_frame, width=90, placeholder_text="20.0-30.0")
-                entry.insert(0, f"{p_price:.2f}")
-                entry.pack(side="left", padx=5)
+                # Round pricing input
+                r_lbl = ctk.CTkLabel(input_frame, text="Round (₱):", font=ctk.CTkFont(size=11))
+                r_lbl.pack(side="left", padx=(10, 2))
+                entry_round = ctk.CTkEntry(input_frame, width=70, placeholder_text="25.00")
+                if c_round is not None:
+                    entry_round.insert(0, f"{c_round:.2f}")
+                entry_round.pack(side="left", padx=5)
+                
+                # Slim pricing input
+                s_lbl = ctk.CTkLabel(input_frame, text="Slim (₱):", font=ctk.CTkFont(size=11))
+                s_lbl.pack(side="left", padx=(15, 2))
+                entry_slim = ctk.CTkEntry(input_frame, width=70, placeholder_text="30.00")
+                if c_slim is not None:
+                    entry_slim.insert(0, f"{c_slim:.2f}")
+                entry_slim.pack(side="left", padx=5)
                 
                 btn_save = ctk.CTkButton(
-                    input_frame, text="Update Price", width=100, fg_color="#10b981", hover_color="#059669",
+                    input_frame, text="Save Rates", width=90, fg_color="#10b981", hover_color="#059669",
                     font=ctk.CTkFont(family="Outfit", weight="bold"),
-                    command=lambda pid=p_id, ent=entry: self.update_product_price(pid, ent)
+                    command=lambda cid=c_id, er=entry_round, es=entry_slim: self.update_customer_price_rates(cid, er, es)
                 )
-                btn_save.pack(side="left", padx=5)
+                btn_save.pack(side="left", padx=(15, 5))
                 
             self.show_view("prices")
         except Exception as e:
-            messagebox.showerror("Pricing Error", f"Failed to load product prices: {e}")
+            messagebox.showerror("Pricing Error", f"Failed to load customers: {e}")
         finally:
             self.configure(cursor="")
             
-    def update_product_price(self, product_id, entry_widget):
-        val_str = entry_widget.get().strip()
+    def update_customer_price_rates(self, customer_id, entry_round, entry_slim):
+        r_val = entry_round.get().strip()
+        s_val = entry_slim.get().strip()
+        
         try:
-            new_price = float(val_str)
-            if not (20.0 <= new_price <= 30.0):
-                messagebox.showwarning("Pricing Control", "Price must be between ₱20.00 and ₱30.00.")
+            new_round = float(r_val) if r_val else None
+            if new_round is not None and not (20.0 <= new_round <= 30.0):
+                messagebox.showwarning("Pricing Control", "Round container price must be between ₱20.00 and ₱30.00.")
                 return
         except ValueError:
-            messagebox.showwarning("Pricing Control", "Please enter a valid decimal number.")
+            messagebox.showwarning("Pricing Control", "Please enter a valid round price decimal number.")
+            return
+            
+        try:
+            new_slim = float(s_val) if s_val else None
+            if new_slim is not None and not (20.0 <= new_slim <= 30.0):
+                messagebox.showwarning("Pricing Control", "Slim container price must be between ₱20.00 and ₱30.00.")
+                return
+        except ValueError:
+            messagebox.showwarning("Pricing Control", "Please enter a valid slim price decimal number.")
             return
             
         conn = self.get_db_connection()
         cursor = conn.cursor()
         try:
-            cursor.execute("UPDATE products SET price = ? WHERE id = ?", (new_price, product_id))
+            cursor.execute("UPDATE customers SET custom_price_round = ?, custom_price_slim = ? WHERE id = ?", (new_round, new_slim, customer_id))
             conn.commit()
-            messagebox.showinfo("Pricing Settings", "Product price updated successfully!")
+            messagebox.showinfo("Pricing Settings", "Customer custom prices updated successfully!")
             self.show_prices() # Refresh
         except Exception as e:
             conn.rollback()
-            messagebox.showerror("Database Error", f"Failed to save price: {e}")
+            messagebox.showerror("Database Error", f"Failed to save customer prices: {e}")
         finally:
             conn.close()
 
@@ -761,7 +818,7 @@ class WaterStationApp(ctk.CTk):
         ct_lbl = ctk.CTkLabel(left_panel, text="Select Customer Profile:", font=ctk.CTkFont(family="Outfit", size=11, weight="bold"), text_color="gray")
         ct_lbl.pack(anchor="w", padx=20, pady=(0, 5))
         
-        self.pos_customer_dropdown = ctk.CTkComboBox(left_panel, width=350, state="readonly")
+        self.pos_customer_dropdown = ctk.CTkComboBox(left_panel, width=350, state="readonly", command=self.on_pos_customer_change)
         self.pos_customer_dropdown.pack(anchor="w", padx=20, pady=(0, 20))
         
         # Round container quantity row
@@ -855,7 +912,9 @@ class WaterStationApp(ctk.CTk):
     def recalculate_pos_total(self):
         qty1 = int(self.qty_pickers["qty1"].cget("text"))
         qty2 = int(self.qty_pickers["qty2"].cget("text"))
-        total = (qty1 * 25.0) + (qty2 * 30.0)
+        p_round = getattr(self, 'pos_active_price_round', 25.0)
+        p_slim = getattr(self, 'pos_active_price_slim', 30.0)
+        total = (qty1 * p_round) + (qty2 * p_slim)
         self.pos_total_label.configure(text=f"₱{total:,.2f}")
         
     def reset_pos_fields(self):
@@ -873,7 +932,9 @@ class WaterStationApp(ctk.CTk):
         customer_id = self.pos_customers_data.get(selected_cust)
         qty1 = int(self.qty_pickers["qty1"].cget("text"))
         qty2 = int(self.qty_pickers["qty2"].cget("text"))
-        total = (qty1 * 25.0) + (qty2 * 30.0)
+        p_round = getattr(self, 'pos_active_price_round', 25.0)
+        p_slim = getattr(self, 'pos_active_price_slim', 30.0)
+        total = (qty1 * p_round) + (qty2 * p_slim)
         notes = self.pos_notes.get("1.0", "end").strip()
         delivery_mode = self.pos_delivery_mode.get()
         
@@ -921,15 +982,15 @@ class WaterStationApp(ctk.CTk):
             # Create Order Items & Decrement Inventory
             if qty1 > 0:
                 cursor.execute(
-                    "INSERT INTO order_items (order_id, product_id, quantity, unit_price, subtotal) VALUES (?, ?, ?, 25.00, ?)",
-                    (order_id, p1_id, qty1, qty1 * 25.00)
+                    "INSERT INTO order_items (order_id, product_id, quantity, unit_price, subtotal) VALUES (?, ?, ?, ?, ?)",
+                    (order_id, p1_id, qty1, p_round, qty1 * p_round)
                 )
                 cursor.execute("UPDATE products SET stock_quantity = stock_quantity - ? WHERE id = ?", (qty1, p1_id))
                 
             if qty2 > 0:
                 cursor.execute(
-                    "INSERT INTO order_items (order_id, product_id, quantity, unit_price, subtotal) VALUES (?, ?, ?, 30.00, ?)",
-                    (order_id, p2_id, qty2, qty2 * 30.00)
+                    "INSERT INTO order_items (order_id, product_id, quantity, unit_price, subtotal) VALUES (?, ?, ?, ?, ?)",
+                    (order_id, p2_id, qty2, p_slim, qty2 * p_slim)
                 )
                 cursor.execute("UPDATE products SET stock_quantity = stock_quantity - ? WHERE id = ?", (qty2, p2_id))
                 
@@ -1285,7 +1346,7 @@ class WaterStationApp(ctk.CTk):
         # Description
         desc = ctk.CTkLabel(
             view, 
-            text="Modify container refill rates. Prices must be configured within the business bounds of ₱20.00 to ₱30.00.",
+            text="Modify container refill rates for individual customers. Prices must be configured within the bounds of ₱20.00 to ₱30.00.",
             font=ctk.CTkFont(size=12),
             text_color="gray",
             justify="left"

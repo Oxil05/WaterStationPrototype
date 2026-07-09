@@ -11,6 +11,8 @@ class Customer(db.Model):
     phone = db.Column(db.String(20), nullable=True)
     address = db.Column(db.Text, nullable=True)
     is_active = db.Column(db.Boolean, default=True)
+    custom_price_round = db.Column(db.Float, nullable=True)
+    custom_price_slim = db.Column(db.Float, nullable=True)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc),
                            onupdate=lambda: datetime.now(timezone.utc))

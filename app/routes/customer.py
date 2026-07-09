@@ -60,14 +60,20 @@ def place_order():
         
         total_amount = 0.0
         for product, qty in items_ordered:
-            subtotal = product.price * qty
+            price = product.price
+            if 'Round' in product.name and customer.custom_price_round is not None:
+                price = customer.custom_price_round
+            elif 'Slim' in product.name and customer.custom_price_slim is not None:
+                price = customer.custom_price_slim
+                
+            subtotal = price * qty
             total_amount += subtotal
             
             order_item = OrderItem(
                 order_id=new_order.id,
                 product_id=product.id,
                 quantity=qty,
-                unit_price=product.price,
+                unit_price=price,
                 subtotal=subtotal
             )
             db.session.add(order_item)

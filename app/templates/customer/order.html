@@ -118,7 +118,15 @@
                     </div>
                     
                     <div style="display:flex; align-items:center; gap: 2rem; flex-shrink:0;">
-                        <span style="font-family:'Outfit', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--accent-blue);">&#8369;{{ "%.2f"|format(product.price) }}</span>
+                        <span style="font-family:'Outfit', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--accent-blue);">
+                            &#8369;{% if 'Round' in product.name and customer.custom_price_round is not None %}
+                                {{ "%.2f"|format(customer.custom_price_round) }} <span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal;">(Custom Price)</span>
+                            {% elif 'Slim' in product.name and customer.custom_price_slim is not None %}
+                                {{ "%.2f"|format(customer.custom_price_slim) }} <span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal;">(Custom Price)</span>
+                            {% else %}
+                                {{ "%.2f"|format(product.price) }}
+                            {% endif %}
+                        </span>
                         
                         <!-- Quantity picker -->
                         <div style="display:flex; align-items:center; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); border-radius: 30px; padding: 4px;">
@@ -159,7 +167,13 @@
 <script>
     const prices = {};
     {% for product in products %}
-    prices[{{ product.id }}] = {{ product.price }};
+      {% if 'Round' in product.name and customer.custom_price_round is not None %}
+        prices[{{ product.id }}] = {{ customer.custom_price_round }};
+      {% elif 'Slim' in product.name and customer.custom_price_slim is not None %}
+        prices[{{ product.id }}] = {{ customer.custom_price_slim }};
+      {% else %}
+        prices[{{ product.id }}] = {{ product.price }};
+      {% endif %}
     {% endfor %}
     
     function adjustQty(productId, amount) {

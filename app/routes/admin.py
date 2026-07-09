@@ -46,8 +46,9 @@ def dashboard():
     # Recent orders
     recent_orders = Order.query.order_by(Order.order_date.desc()).limit(10).all()
 
-    # Fetch products for price settings
+    # Fetch products and customers
     products = Product.query.all()
+    customers = Customer.query.filter_by(is_active=True).all()
 
     return render_template('admin/dashboard.html',
         today_revenue=today_revenue,
@@ -55,24 +56,37 @@ def dashboard():
         active_customers=active_customers,
         pending_deliveries=pending_deliveries,
         recent_orders=recent_orders,
-        products=products
+        products=products,
+        customers=customers
     )
 
 
-@admin_bp.route('/update-price/<int:product_id>', methods=['POST'])
+@admin_bp.route('/update-customer-prices/<int:customer_id>', methods=['POST'])
 @login_required
 @admin_required
-def update_price(product_id):
-    product = Product.query.get_or_404(product_id)
+def update_customer_prices(customer_id):
+    customer = Customer.query.get_or_404(customer_id)
     try:
-        new_price = float(request.form.get('price'))
-        if 20.0 <= new_price <= 30.0:
-            product.price = new_price
-            db.session.commit()
-            flash(f'Price for {product.name} updated to ₱{new_price:.2f} successfully.', 'success')
-        else:
-            flash('Error: Price must be between ₱20.00 and ₱30.00.', 'danger')
+        round_str = request.form.get('custom_price_round', '').strip()
+        slim_str = request.form.get('custom_price_slim', '').strip()
+        
+        # If empty, reset to None (uses global default price)
+        new_round = float(round_str) if round_str else None
+        new_slim = float(slim_str) if slim_str else None
+        
+        # Validation checks between 20 and 30 pesos bounds
+        if new_round is not None and not (20.0 <= new_round <= 30.0):
+            flash('Error: Round refill price must be between ₱20.00 and ₱30.00.', 'danger')
+            return redirect(url_for('admin.dashboard'))
+        if new_slim is not None and not (20.0 <= new_slim <= 30.0):
+            flash('Error: Slim refill price must be between ₱20.00 and ₱30.00.', 'danger')
+            return redirect(url_for('admin.dashboard'))
+            
+        customer.custom_price_round = new_round
+        customer.custom_price_slim = new_slim
+        db.session.commit()
+        flash(f'Custom container rates updated for {customer.full_name}.', 'success')
     except (TypeError, ValueError):
-        flash('Error: Invalid price input. Enter a valid number.', 'danger')
+        flash('Error: Invalid price inputs. Enter valid numbers.', 'danger')
         
     return redirect(url_for('admin.dashboard'))
