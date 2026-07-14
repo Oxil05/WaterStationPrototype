@@ -1229,6 +1229,7 @@ class WaterStationApp(ctk.CTk):
         
         view.grid_columnconfigure(0, weight=1)
         view.grid_rowconfigure(1, weight=1)
+        view.grid_rowconfigure(2, weight=0)
         
         toolbar = ctk.CTkFrame(view, fg_color="#131c2e", border_width=1, border_color="#1e293b")
         toolbar.grid(row=0, column=0, sticky="ew", pady=(0, 10))
@@ -1259,6 +1260,36 @@ class WaterStationApp(ctk.CTk):
             [80, 180, 100, 100, 150, 300]
         )
         self.hist_tree.pack(fill="both", expand=True)
+        
+        # Report generator toolbar card
+        report_panel = ctk.CTkFrame(view, fg_color="#131c2e", border_width=1, border_color="#1e293b")
+        report_panel.grid(row=2, column=0, sticky="ew", pady=(10, 0))
+        
+        lbl_rep_title = ctk.CTkLabel(report_panel, text="Financial Report Console:", font=ctk.CTkFont(family="Outfit", size=12, weight="bold"))
+        lbl_rep_title.pack(side="left", padx=20, pady=15)
+        
+        lbl_rep_range = ctk.CTkLabel(report_panel, text="Range:", font=ctk.CTkFont(size=11))
+        lbl_rep_range.pack(side="left", padx=(10, 5), pady=15)
+        
+        self.report_range_filter = ctk.CTkComboBox(
+            report_panel, width=130, values=["All Time", "Today", "Yesterday", "Last 7 Days", "Last 30 Days", "This Month", "This Year"], state="readonly"
+        )
+        self.report_range_filter.pack(side="left", padx=5, pady=15)
+        self.report_range_filter.set("Last 30 Days")
+        
+        btn_csv = ctk.CTkButton(
+            report_panel, text="Export CSV Spreadsheet", width=170, fg_color="#3b82f6", hover_color="#2563eb",
+            font=ctk.CTkFont(family="Outfit", weight="bold"),
+            command=lambda: self.export_sales_report("csv")
+        )
+        btn_csv.pack(side="left", padx=15, pady=15)
+        
+        btn_html = ctk.CTkButton(
+            report_panel, text="Print HTML Report (PDF)", width=170, fg_color="#10b981", hover_color="#059669",
+            font=ctk.CTkFont(family="Outfit", weight="bold"),
+            command=lambda: self.export_sales_report("html")
+        )
+        btn_html.pack(side="left", padx=5, pady=15)
         
     def refresh_history_data(self):
         # Transaction history loader run on main thread since it responds to live key entry events (fast query)
@@ -1295,6 +1326,524 @@ class WaterStationApp(ctk.CTk):
                 values=(f"#{r['id']}", r['full_name'], f"₱{r['total_amount']:.2f}", r['status'].capitalize(), dt_str, r['notes'] or '')
             )
         conn.close()
+
+    def export_sales_report(self, format_type):
+        from datetime import timedelta
+        import csv
+        import webbrowser
+        
+        # Fetch data
+        conn = self.get_db_connection()
+        cursor = conn.cursor()
+        
+        try:
+            cursor.execute("""
+                SELECT o.id, c.full_name, o.total_amount, o.status, o.order_date, o.notes
+                FROM orders o
+                JOIN customers c ON o.customer_id = c.id
+                ORDER BY o.order_date DESC
+            """)
+            orders = cursor.fetchall()
+            
+            cursor.execute("""
+                SELECT oi.order_id, p.name, oi.quantity, oi.unit_price, oi.subtotal
+                FROM order_items oi
+                JOIN products p ON oi.product_id = p.id
+            """)
+            order_items = cursor.fetchall()
+        except Exception as e:
+            messagebox.showerror("Export Error", f"Failed to retrieve transaction records:\n{e}")
+            conn.close()
+            return
+        finally:
+            conn.close()
+            
+        # Group order items
+        items_by_order = {}
+        for item in order_items:
+            oid = item['order_id']
+            if oid not in items_by_order:
+                items_by_order[oid] = []
+            items_by_order[oid].append(item)
+            
+        # Filter ranges
+        range_val = self.report_range_filter.get()
+        now = datetime.now()
+        filtered_records = []
+        
+        for o in orders:
+            try:
+                dt_str = o['order_date'].replace('Z', '+00:00')
+                dt = datetime.fromisoformat(dt_str)
+            except ValueError:
+                try:
+                    dt = datetime.strptime(o['order_date'][:19], '%Y-%m-%d %H:%M:%S')
+                except ValueError:
+                    try:
+                        dt = datetime.strptime(o['order_date'][:10], '%Y-%m-%d')
+                    except ValueError:
+                        continue
+            
+            is_match = False
+            if range_val == "All Time":
+                is_match = True
+            elif range_val == "Today":
+                is_match = dt.date() == now.date()
+            elif range_val == "Yesterday":
+                is_match = dt.date() == (now - timedelta(days=1)).date()
+            elif range_val == "Last 7 Days":
+                is_match = dt.date() >= (now - timedelta(days=7)).date()
+            elif range_val == "Last 30 Days":
+                is_match = dt.date() >= (now - timedelta(days=30)).date()
+            elif range_val == "This Month":
+                is_match = dt.year == now.year and dt.month == now.month
+            elif range_val == "This Year":
+                is_match = dt.year == now.year
+                
+            if is_match:
+                filtered_records.append((o, dt))
+                
+        if not filtered_records:
+            messagebox.showinfo("Export Console", f"No transaction records found for the range: '{range_val}'.")
+            return
+            
+        # Calculate stats
+        total_revenue = 0.0
+        total_orders = len(filtered_records)
+        completed = 0
+        confirmed = 0
+        pending = 0
+        cancelled = 0
+        round_sold = 0
+        slim_sold = 0
+        
+        for o, dt in filtered_records:
+            status = o['status'].lower()
+            if status == 'completed':
+                completed += 1
+                total_revenue += o['total_amount']
+            elif status == 'confirmed':
+                confirmed += 1
+                total_revenue += o['total_amount']
+            elif status == 'pending':
+                pending += 1
+            elif status == 'cancelled':
+                cancelled += 1
+                
+            oid = o['id']
+            if oid in items_by_order:
+                for item in items_by_order[oid]:
+                    pname = item['name']
+                    qty = item['quantity']
+                    if 'Round' in pname:
+                        round_sold += qty
+                    elif 'Slim' in pname:
+                        slim_sold += qty
+                        
+        avg_value = total_revenue / (completed + confirmed) if (completed + confirmed) > 0 else 0.0
+        
+        # Create directory
+        os.makedirs("exports", exist_ok=True)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename_base = f"sales_report_{range_val.lower().replace(' ', '_')}_{timestamp}"
+        
+        if format_type == "csv":
+            filepath = os.path.join("exports", f"{filename_base}.csv")
+            try:
+                with open(filepath, "w", newline="", encoding="utf-8") as f:
+                    writer = csv.writer(f)
+                    writer.writerow(["AquaFlow Mineral Water Station - Financial Sales Report"])
+                    writer.writerow(["Report Filter Range", range_val])
+                    writer.writerow(["Generated At", datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
+                    writer.writerow([])
+                    writer.writerow(["METRICS SUMMARY"])
+                    writer.writerow(["Total Realized Revenue", f"PHP {total_revenue:.2f}"])
+                    writer.writerow(["Total Order Entries Count", total_orders])
+                    writer.writerow(["Completed Refills", completed])
+                    writer.writerow(["Confirmed Refills", confirmed])
+                    writer.writerow(["Pending Refills", pending])
+                    writer.writerow(["Cancelled Refills", cancelled])
+                    writer.writerow(["Average Ticket Size (Completed/Confirmed)", f"PHP {avg_value:.2f}"])
+                    writer.writerow(["Round Refills Sold (Units)", round_sold])
+                    writer.writerow(["Slim Refills Sold (Units)", slim_sold])
+                    writer.writerow([])
+                    writer.writerow(["DETAILED TRANSACTION LOGS"])
+                    writer.writerow(["Order ID", "Customer Name", "Order Date", "Status", "Total Amount", "Notes", "Round Refills (Qty)", "Slim Refills (Qty)"])
+                    
+                    for o, dt in filtered_records:
+                        oid = o['id']
+                        r_qty, s_qty = 0, 0
+                        if oid in items_by_order:
+                            for item in items_by_order[oid]:
+                                if 'Round' in item['name']:
+                                    r_qty = item['quantity']
+                                elif 'Slim' in item['name']:
+                                    s_qty = item['quantity']
+                        writer.writerow([
+                            f"#{oid}",
+                            o['full_name'],
+                            dt.strftime("%Y-%m-%d %H:%M"),
+                            o['status'].upper(),
+                            f"{o['total_amount']:.2f}",
+                            o['notes'] or "",
+                            r_qty,
+                            s_qty
+                        ])
+                messagebox.showinfo("Export Successful", f"Spreadsheet CSV report saved successfully to:\n\n{os.path.abspath(filepath)}")
+            except Exception as e:
+                messagebox.showerror("Export Failure", f"Failed to write CSV file:\n{e}")
+                
+        elif format_type == "html":
+            filepath = os.path.join("exports", f"{filename_base}.html")
+            
+            table_rows_html = ""
+            for o, dt in filtered_records:
+                oid = o['id']
+                r_qty, s_qty = 0, 0
+                if oid in items_by_order:
+                    for item in items_by_order[oid]:
+                        if 'Round' in item['name']:
+                            r_qty = item['quantity']
+                        elif 'Slim' in item['name']:
+                            s_qty = item['quantity']
+                table_rows_html += f"""
+                <tr>
+                    <td><strong>#{oid}</strong></td>
+                    <td>{o['full_name']}</td>
+                    <td>{dt.strftime('%b %d, %Y %H:%M')}</td>
+                    <td><span class="status-badge status-{o['status'].lower()}">{o['status'].upper()}</span></td>
+                    <td class="text-right"><strong>₱{o['total_amount']:.2f}</strong></td>
+                    <td>{r_qty} / {s_qty}</td>
+                    <td><span class="notes-text">{o['notes'] or '-'}</span></td>
+                </tr>
+                """
+                
+            html_content = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AquaFlow Sales Report - {range_val}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {{
+            --bg-color: #030712;
+            --bg-card: rgba(17, 24, 39, 0.7);
+            --border-color: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-blue: #06b6d4;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-orange: #f59e0b;
+        }}
+        
+        body {{
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            padding: 3rem 2rem;
+            min-height: 100vh;
+        }}
+        
+        .container {{
+            max-width: 1000px;
+            margin: 0 auto;
+        }}
+        
+        .header {{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 2rem;
+            margin-bottom: 2.5rem;
+        }}
+        
+        .brand {{
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }}
+        
+        .brand-icon {{
+            color: var(--accent-blue);
+            font-size: 2.5rem;
+            font-weight: 800;
+        }}
+        
+        .brand-text {{
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }}
+        
+        .report-meta {{
+            text-align: right;
+        }}
+        
+        .report-title {{
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin: 0 0 6px 0;
+            color: var(--accent-blue);
+            text-transform: uppercase;
+        }}
+        
+        .report-subtitle {{
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }}
+        
+        .metrics-grid {{
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }}
+        
+        .metric-card {{
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }}
+        
+        .metric-label {{
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }}
+        
+        .metric-value {{
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }}
+        
+        .metric-value.highlight {{
+            color: var(--accent-green);
+        }}
+        
+        h2 {{
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1.25rem;
+            border-left: 4px solid var(--accent-blue);
+            padding-left: 10px;
+        }}
+        
+        table {{
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 3rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }}
+        
+        th {{
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-primary);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            text-align: left;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border-color);
+        }}
+        
+        td {{
+            padding: 14px 18px;
+            font-size: 0.9rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+            color: #cbd5e1;
+        }}
+        
+        tr:hover td {{
+            background: rgba(255, 255, 255, 0.01);
+        }}
+        
+        .text-right {{
+            text-align: right;
+        }}
+        
+        .status-badge {{
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 4px 8px;
+            border-radius: 4px;
+            letter-spacing: 0.3px;
+        }}
+        
+        .status-completed {{
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent-green);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }}
+        
+        .status-confirmed {{
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--accent-blue);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+        }}
+        
+        .status-pending {{
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--accent-orange);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }}
+        
+        .status-cancelled {{
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--accent-red);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }}
+        
+        .notes-text {{
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }}
+        
+        .footer {{
+            margin-top: 5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }}
+        
+        .signature-line {{
+            width: 220px;
+            border-top: 1px solid var(--text-secondary);
+            margin-top: 3.5rem;
+            text-align: center;
+            padding-top: 8px;
+        }}
+        
+        @media print {{
+            body {{
+                background-color: #fff;
+                color: #000;
+                padding: 0;
+            }}
+            :root {{
+                --bg-color: #fff;
+                --text-primary: #000;
+                --text-secondary: #475569;
+                --border-color: #cbd5e1;
+                --bg-card: transparent;
+            }}
+            .metric-card {{
+                border: 1px solid #94a3b8;
+            }}
+            table {{
+                border: 1px solid #94a3b8;
+            }}
+            th {{
+                border-bottom: 1px solid #94a3b8;
+                color: #000;
+            }}
+            td {{
+                color: #000;
+                border-bottom: 1px solid #e2e8f0;
+            }}
+            .status-badge {{
+                border: none;
+                padding: 0;
+            }}
+        }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="brand">
+                <span class="brand-icon">💧</span>
+                <div class="brand-text">AquaFlow Station</div>
+            </div>
+            <div class="report-meta">
+                <h1 class="report-title">Financial Sales Report</h1>
+                <p class="report-subtitle">Filter Range: <strong>{range_val}</strong></p>
+                <p class="report-subtitle" style="font-size:0.75rem; margin-top:4px;">Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M')}</p>
+            </div>
+        </div>
+        
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-label">Realized Revenue</div>
+                <div class="metric-value highlight">₱{total_revenue:,.2f}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Refill Orders</div>
+                <div class="metric-value">{total_orders}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Round Refills</div>
+                <div class="metric-value">{round_sold} units</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Slim Refills</div>
+                <div class="metric-value">{slim_sold} units</div>
+            </div>
+        </div>
+        
+        <h2>Detailed Transaction Logs</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Order</th>
+                    <th>Customer</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th class="text-right">Amount</th>
+                    <th>Refills (R/S)</th>
+                    <th>Delivery Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {table_rows_html}
+            </tbody>
+        </table>
+        
+        <div class="footer">
+            <div>
+                <p>Location: Bancal, Meycauayan, Bulacan</p>
+                <p style="font-size:0.75rem; margin-top:4px;">Document generated securely via AquaFlow POS Engine.</p>
+            </div>
+            <div>
+                <div class="signature-line">
+                    Station Manager / Operator
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+"""
+            try:
+                with open(filepath, "w", encoding="utf-8") as f:
+                    f.write(html_content)
+                messagebox.showinfo("Report Exported", f"HTML report page saved successfully to:\n\n{os.path.abspath(filepath)}\n\nOpening print dashboard in default web browser...")
+                webbrowser.open(f"file:///{os.path.abspath(filepath)}")
+            except Exception as e:
+                messagebox.showerror("Export Failure", f"Failed to write HTML file:\n{e}")
 
     def create_ai_view(self):
         view = ctk.CTkFrame(self.main_container, fg_color="transparent")

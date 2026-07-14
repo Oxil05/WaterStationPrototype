@@ -7,3 +7,9 @@ __pycache__/
 # PyInstaller build files
 build/
 *.spec
+
+# Local user exports
+exports/
+instance/
+*.db
+
