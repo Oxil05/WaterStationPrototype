@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}Customers Directory{% endblock %}
+{% block page_title %}Clients Directory{% endblock %}
+
+{% block head %}
+<style>
+    .customer-table-container {
+        margin-top: 1rem;
+    }
+    
+    .pricing-form {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .input-mini-price {
+        width: 75px;
+        padding: 6px 8px;
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        color: var(--text-primary);
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-align: center;
+        outline: none;
+        transition: var(--transition);
+    }
+    
+    .input-mini-price:focus {
+        border-color: var(--accent-blue);
+    }
+    
+    .btn-mini-save {
+        background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-blue-dark) 100%);
+        color: white;
+        border: none;
+        font-weight: 700;
+        border-radius: var(--radius-sm);
+        padding: 6px 12px;
+        font-size: 0.78rem;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+    
+    .btn-mini-save:hover {
+        box-shadow: 0 0 10px rgba(6, 182, 212, 0.25);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="recent-orders-section customer-table-container">
+    <div class="section-header">
+        <h2>Active Customer Accounts</h2>
+    </div>
+    
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Customer Name</th>
+                    <th>Contact Phone</th>
+                    <th>Delivery Address</th>
+                    <th>Refills Placed</th>
+                    <th>Total Spent</th>
+                    <th>Custom Pricing Config (Round / Slim)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for customer in customers %}
+                <tr>
+                    <td><strong>{{ customer.full_name }}</strong></td>
+                    <td style="font-size:0.85rem; color:var(--text-secondary);">{{ customer.phone or 'Not configured' }}</td>
+                    <td style="font-size:0.85rem; color:var(--text-secondary); max-width: 220px; word-wrap: break-word;">{{ customer.address or 'Not configured' }}</td>
+                    <td><strong style="color:var(--accent-blue);">{{ customer.order_count }} orders</strong></td>
+                    <td><strong style="color:var(--accent-green);">&#8369;{{ "%.2f"|format(customer.total_spent) }}</strong></td>
+                    <td>
+                        <form action="{{ url_for('admin.update_customer_prices', customer_id=customer.id) }}" method="POST" class="pricing-form">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            
+                            <input type="number" name="custom_price_round" class="input-mini-price" min="20" max="30" step="0.5" placeholder="Round" value="{{ customer.custom_price_round or '' }}">
+                            <span style="color:var(--text-muted); font-size:0.8rem;">/</span>
+                            <input type="number" name="custom_price_slim" class="input-mini-price" min="20" max="30" step="0.5" placeholder="Slim" value="{{ customer.custom_price_slim or '' }}">
+                            
+                            <button type="submit" class="btn-mini-save">Save</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="empty-state">No registered customer profiles found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

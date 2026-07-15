@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}Deliveries Dispatch Console{% endblock %}
+{% block page_title %}Delivery Dispatch console{% endblock %}
+
+{% block head %}
+<style>
+    .input-driver {
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        color: var(--text-primary);
+        padding: 6px 10px;
+        font-size: 0.82rem;
+        outline: none;
+        width: 110px;
+    }
+    
+    .input-driver:focus {
+        border-color: var(--accent-blue);
+    }
+    
+    .status-badge-delivery {
+        font-size: 0.72rem;
+        font-weight: 800;
+        padding: 4px 8px;
+        border-radius: 4px;
+    }
+    
+    .del-pending {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--accent-orange);
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+    
+    .del-in_transit {
+        background: rgba(139, 92, 246, 0.1);
+        color: var(--accent-purple);
+        border: 1px solid rgba(139, 92, 246, 0.2);
+    }
+    
+    .del-delivered {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--accent-green);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    
+    .del-failed {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--accent-red);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="recent-orders-section">
+    <div class="section-header">
+        <h2>Delivery Fleet & Logs</h2>
+    </div>
+    
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Order #</th>
+                    <th>Customer Name</th>
+                    <th>Delivery Address</th>
+                    <th>Driver Assigned</th>
+                    <th>Delivery Status</th>
+                    <th>Date Finished</th>
+                    <th>Manage Dispatch</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for del in deliveries %}
+                <tr>
+                    <td><strong style="color:var(--accent-blue);">#{{ del.order_id }}</strong></td>
+                    <td><strong>{{ del.order.customer.full_name }}</strong></td>
+                    <td style="font-size:0.85rem; color:var(--text-secondary); max-width: 200px; word-wrap: break-word;">{{ del.order.customer.address }}</td>
+                    <td>
+                        {% if del.driver_name %}
+                        <span style="font-weight:700; color:var(--text-primary);"><i class="fas fa-user-tie" style="color:var(--accent-orange); margin-right:4px;"></i>{{ del.driver_name }}</span>
+                        {% else %}
+                        <span style="color:var(--text-muted); font-size:0.82rem; font-style:italic;">Unassigned</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="status-badge-delivery del-{{ del.status }}">{{ del.status|upper|replace('_', ' ') }}</span>
+                    </td>
+                    <td style="font-size:0.85rem; color:var(--text-secondary);">
+                        {% if del.delivery_date %}
+                        {{ del.delivery_date.strftime('%b %d, %H:%M') }}
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                    <td>
+                        <form action="{{ url_for('admin.update_delivery', delivery_id=del.id) }}" method="POST" style="display:flex; align-items:center; gap:8px;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            
+                            <input type="text" name="driver_name" class="input-driver" placeholder="Driver name" value="{{ del.driver_name or '' }}">
+                            
+                            <select name="status" class="action-select">
+                                <option value="pending" {% if del.status == 'pending' %}selected{% endif %}>Pending</option>
+                                <option value="in_transit" {% if del.status == 'in_transit' %}selected{% endif %}>In Transit</option>
+                                <option value="delivered" {% if del.status == 'delivered' %}selected{% endif %}>Delivered</option>
+                                <option value="failed" {% if del.status == 'failed' %}selected{% endif %}>Failed</option>
+                            </select>
+                            
+                            <button type="submit" class="btn-save-status">Save</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="empty-state">No delivery logs found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

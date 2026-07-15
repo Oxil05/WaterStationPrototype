@@ -27,19 +27,19 @@
                 <i class="fas fa-th-large"></i>
                 <span>Dashboard</span>
             </a>
-            <a href="#" class="nav-item">
+            <a href="{{ url_for('admin.orders') }}" class="nav-item {% if request.endpoint == 'admin.orders' %}active{% endif %}">
                 <i class="fas fa-shopping-cart"></i>
                 <span>Orders</span>
             </a>
-            <a href="#" class="nav-item">
+            <a href="{{ url_for('admin.customers') }}" class="nav-item {% if request.endpoint == 'admin.customers' %}active{% endif %}">
                 <i class="fas fa-users"></i>
                 <span>Customers</span>
             </a>
-            <a href="#" class="nav-item">
+            <a href="{{ url_for('admin.deliveries') }}" class="nav-item {% if request.endpoint == 'admin.deliveries' %}active{% endif %}">
                 <i class="fas fa-truck"></i>
                 <span>Deliveries</span>
             </a>
-            <a href="#" class="nav-item">
+            <a href="{{ url_for('admin.revenue') }}" class="nav-item {% if request.endpoint == 'admin.revenue' %}active{% endif %}">
                 <i class="fas fa-chart-line"></i>
                 <span>Revenue</span>
             </a>
