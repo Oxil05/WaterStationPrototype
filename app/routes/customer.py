@@ -21,7 +21,14 @@ def dashboard():
     # Sort orders by date descending
     orders = sorted(customer.orders, key=lambda o: o.order_date, reverse=True)
     
-    return render_template('customer/dashboard.html', customer=customer, orders=orders)
+    # Find active order (uncompleted/undelivered)
+    active_order = None
+    for o in orders:
+        if o.status in ('pending', 'confirmed') or (o.delivery and o.delivery.status in ('pending', 'in_transit')):
+            active_order = o
+            break
+    
+    return render_template('customer/dashboard.html', customer=customer, orders=orders, active_order=active_order)
 
 
 @customer_bp.route('/order', methods=['GET', 'POST'])

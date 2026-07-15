@@ -79,6 +79,138 @@
             gap: 2rem;
         }
     }
+    
+    /* Stepper / Timeline Tracker styles */
+    .tracker-card {
+        background: linear-gradient(135deg, rgba(17, 24, 39, 0.9) 0%, rgba(6, 182, 212, 0.03) 100%);
+        border: 1px solid rgba(6, 182, 212, 0.15);
+        border-radius: var(--radius-lg);
+        padding: 2.25rem 2rem;
+        margin-bottom: 2.5rem;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+    }
+    
+    .stepper {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+        margin-top: 1.5rem;
+    }
+    
+    .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        z-index: 2;
+        width: 130px;
+        text-align: center;
+        position: relative;
+    }
+    
+    .step-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: #0f172a;
+        border: 2px solid #334155;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .step.active .step-icon {
+        border-color: var(--accent-blue);
+        color: var(--accent-blue);
+        background: rgba(6, 182, 212, 0.08);
+        box-shadow: 0 0 15px rgba(6, 182, 212, 0.25);
+    }
+    
+    .step.current-step .step-icon {
+        animation: pulse-blue-step 2s infinite alternate;
+        background: rgba(6, 182, 212, 0.12);
+    }
+    
+    @keyframes pulse-blue-step {
+        0% {
+            box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.4);
+            border-color: var(--accent-blue);
+        }
+        100% {
+            box-shadow: 0 0 20px 4px rgba(6, 182, 212, 0.2);
+            border-color: #22d3ee;
+        }
+    }
+    
+    .step-label {
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        margin-top: 12px;
+        transition: color 0.3s ease;
+    }
+    
+    .step.active .step-label {
+        color: var(--text-primary);
+    }
+    
+    .step-time {
+        font-size: 0.72rem;
+        color: var(--accent-blue);
+        margin-top: 4px;
+        font-weight: 600;
+    }
+    
+    .step-driver {
+        font-size: 0.72rem;
+        color: var(--accent-orange);
+        margin-top: 6px;
+        font-weight: 700;
+        background: rgba(245, 158, 11, 0.08);
+        border: 1px solid rgba(245, 158, 11, 0.15);
+        padding: 2px 6px;
+        border-radius: 4px;
+        white-space: nowrap;
+    }
+    
+    .step-connector {
+        flex: 1;
+        height: 3px;
+        background: #334155;
+        margin-top: -38px; /* aligns with icons vertical center */
+        z-index: 1;
+        transition: background 0.4s ease;
+    }
+    
+    .step-connector.active {
+        background: linear-gradient(90deg, var(--accent-blue) 0%, var(--accent-blue-dark) 100%);
+        box-shadow: 0 0 8px rgba(6, 182, 212, 0.3);
+    }
+    
+    @media (max-width: 768px) {
+        .stepper {
+            flex-direction: column;
+            gap: 1.5rem;
+            align-items: flex-start;
+            padding-left: 20px;
+        }
+        .step {
+            flex-direction: row;
+            text-align: left;
+            width: 100%;
+            gap: 15px;
+        }
+        .step-label {
+            margin-top: 0;
+        }
+        .step-connector {
+            display: none;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -118,6 +250,61 @@
         </a>
     </div>
 </div>
+
+{% if active_order %}
+    {% set is_step1_curr = active_order.status == 'pending' %}
+    {% set is_step2_curr = active_order.status == 'confirmed' and (not active_order.delivery or active_order.delivery.status == 'pending') %}
+    {% set is_step3_curr = active_order.delivery and active_order.delivery.status == 'in_transit' %}
+    {% set is_step4_curr = active_order.delivery and active_order.delivery.status == 'delivered' %}
+    
+    <div class="tracker-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:12px;">
+            <h3 style="font-family:'Outfit', sans-serif; font-size:1.15rem; font-weight:700; color:#fff; margin:0; display:flex; align-items:center; gap:8px;">
+                <i class="fas fa-route" style="color:var(--accent-blue);"></i> Live Delivery Tracker
+            </h3>
+            <span style="font-size:0.8rem; color:var(--text-secondary);">Order Refill <strong style="color:var(--accent-blue);">#{{ active_order.id }}</strong></span>
+        </div>
+        
+        <div class="stepper">
+            <!-- Step 1: Requested -->
+            <div class="step {% if active_order.status in ('pending', 'confirmed', 'completed') %}active{% endif %} {% if is_step1_curr %}current-step{% endif %}">
+                <div class="step-icon"><i class="fas fa-shopping-basket"></i></div>
+                <div class="step-label">Requested</div>
+                <div class="step-time">{{ active_order.order_date.strftime('%I:%M %p') }}</div>
+            </div>
+            
+            <!-- Connector 1 -->
+            <div class="step-connector {% if active_order.status in ('confirmed', 'completed') %}active{% endif %}"></div>
+            
+            <!-- Step 2: Confirmed -->
+            <div class="step {% if active_order.status in ('confirmed', 'completed') %}active{% endif %} {% if is_step2_curr %}current-step{% endif %}">
+                <div class="step-icon"><i class="fas fa-clipboard-check"></i></div>
+                <div class="step-label">Confirmed</div>
+            </div>
+            
+            <!-- Connector 2 -->
+            <div class="step-connector {% if active_order.delivery and active_order.delivery.status in ('in_transit', 'delivered') %}active{% endif %}"></div>
+            
+            <!-- Step 3: Out for Delivery -->
+            <div class="step {% if active_order.delivery and active_order.delivery.status in ('in_transit', 'delivered') %}active{% endif %} {% if is_step3_curr %}current-step{% endif %}">
+                <div class="step-icon"><i class="fas fa-truck-fast"></i></div>
+                <div class="step-label">On the Way</div>
+                {% if active_order.delivery and active_order.delivery.driver_name %}
+                <div class="step-driver"><i class="fas fa-user-tie" style="margin-right:4px;"></i>{{ active_order.delivery.driver_name }}</div>
+                {% endif %}
+            </div>
+            
+            <!-- Connector 3 -->
+            <div class="step-connector {% if active_order.delivery and active_order.delivery.status == 'delivered' %}active{% endif %}"></div>
+            
+            <!-- Step 4: Delivered -->
+            <div class="step {% if active_order.delivery and active_order.delivery.status == 'delivered' %}active{% endif %} {% if is_step4_curr %}current-step{% endif %}">
+                <div class="step-icon"><i class="fas fa-hand-holding-droplet"></i></div>
+                <div class="step-label">Delivered</div>
+            </div>
+        </div>
+    </div>
+{% endif %}
 
 <div class="portal-container">
     <!-- Left: History -->
