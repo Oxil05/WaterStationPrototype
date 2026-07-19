@@ -28,10 +28,10 @@
     <!-- Admin Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <div class="brand">
+            <a href="{{ url_for('auth.index') }}" class="brand">
                 <i class="fas fa-tint"></i>
                 <span>AquaFlow</span>
-            </div>
+            </a>
         </div>
         <nav class="sidebar-nav">
             <a href="{{ url_for('admin.dashboard') }}" class="nav-item {% if request.endpoint == 'admin.dashboard' %}active{% endif %}">
@@ -65,10 +65,10 @@
     {% elif current_user.is_authenticated %}
     <!-- Customer Top Navbar -->
     <nav class="top-navbar">
-        <div class="brand">
+        <a href="{{ url_for('auth.index') }}" class="brand">
             <i class="fas fa-tint"></i>
             <span>AquaFlow</span>
-        </div>
+        </a>
         <div class="nav-links">
             <a href="{{ url_for('customer.dashboard') }}" class="nav-item {% if request.endpoint == 'customer.dashboard' %}active{% endif %}">Dashboard</a>
             <a href="{{ url_for('customer.place_order') }}" class="nav-item {% if request.endpoint == 'customer.place_order' %}active{% endif %}">Order Refill</a>
