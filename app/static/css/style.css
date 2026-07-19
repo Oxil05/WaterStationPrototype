@@ -4,6 +4,10 @@
     --bg-secondary: #0b0f19;
     --bg-tertiary: #111827;
     --bg-card: rgba(17, 24, 39, 0.7);
+    --bg-sidebar: rgba(11, 15, 25, 0.8);
+    --bg-navbar: rgba(11, 15, 25, 0.75);
+    --bg-input: rgba(3, 7, 18, 0.6);
+    --bg-input-focus: rgba(3, 7, 18, 0.8);
     --text-primary: #f8fafc;
     --text-secondary: #cbd5e1;
     --text-muted: #64748b;
@@ -22,7 +26,27 @@
     --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.15);
     --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.3);
     --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.45);
-    --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    --transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ===== Light Mode Theme ===== */
+[data-theme="light"] {
+    --bg-primary: #f8fafc;
+    --bg-secondary: #f1f5f9;
+    --bg-tertiary: #e2e8f0;
+    --bg-card: rgba(255, 255, 255, 0.8);
+    --bg-sidebar: rgba(241, 245, 249, 0.95);
+    --bg-navbar: rgba(241, 245, 249, 0.9);
+    --bg-input: rgba(255, 255, 255, 0.85);
+    --bg-input-focus: rgba(255, 255, 255, 1.0);
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    --border-color: rgba(15, 23, 42, 0.1);
+    --border-glow: rgba(6, 182, 212, 0.1);
+    --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.04);
+    --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.06);
+    --shadow-lg: 0 16px 40px rgba(15, 23, 42, 0.08);
 }
 
 /* ===== Reset & Base ===== */
@@ -72,7 +96,7 @@ a { text-decoration: none; color: inherit; }
     left: 0;
     width: var(--sidebar-width);
     height: 100vh;
-    background: rgba(11, 15, 25, 0.8);
+    background: var(--bg-sidebar);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-right: 1px solid var(--border-color);
@@ -448,7 +472,7 @@ a { text-decoration: none; color: inherit; }
     align-items: center;
     justify-content: space-between;
     padding: 1.25rem 3rem;
-    background: rgba(11, 15, 25, 0.75);
+    background: var(--bg-navbar);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--border-color);
@@ -475,7 +499,7 @@ a { text-decoration: none; color: inherit; }
 input[type="text"], input[type="email"], input[type="password"], textarea, select {
     width: 100%;
     padding: 14px 18px;
-    background: rgba(3, 7, 18, 0.6);
+    background: var(--bg-input);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     color: var(--text-primary);
@@ -487,7 +511,42 @@ input[type="text"], input[type="email"], input[type="password"], textarea, selec
 input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus, textarea:focus, select:focus {
     border-color: var(--accent-blue);
     box-shadow: 0 0 15px rgba(6, 182, 212, 0.15);
-    background: rgba(3, 7, 18, 0.8);
+    background: var(--bg-input-focus);
+}
+
+/* ===== Theme Switcher Buttons ===== */
+.theme-btn, .theme-btn-nav, .theme-btn-floating {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    outline: none;
+}
+
+.theme-btn:hover, .theme-btn-nav:hover, .theme-btn-floating:hover {
+    color: var(--accent-blue);
+    background: rgba(6, 182, 212, 0.08);
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 12px var(--border-glow);
+    transform: scale(1.05);
+}
+
+.theme-btn-floating {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.theme-btn-nav {
+    margin: 0 10px;
 }
 
 /* ===== Responsive ===== */

@@ -20,4 +20,32 @@ document.addEventListener('DOMContentLoaded', function() {
             item.classList.add('active');
         }
     });
+
+    // Theme Toggle Functionality
+    const toggleBtn = document.getElementById('theme-toggle');
+    if (toggleBtn) {
+        const updateIcon = (theme) => {
+            const icon = toggleBtn.querySelector('i');
+            if (icon) {
+                if (theme === 'light') {
+                    icon.className = 'fas fa-moon';
+                } else {
+                    icon.className = 'fas fa-sun';
+                }
+            }
+        };
+
+        // Sync initial icon state
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+        updateIcon(currentTheme);
+
+        toggleBtn.addEventListener('click', function() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateIcon(newTheme);
+        });
+    }
 });
