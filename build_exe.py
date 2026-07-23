@@ -4,7 +4,7 @@ import sys
 import shutil
 
 def build():
-    print("Preparing to build stand-alone executable for AquaFlow Desktop...")
+    print("Preparing to build stand-alone executable for Waterbank Desktop...")
     
     # Locate project root
     project_root = os.path.dirname(os.path.abspath(__file__))
@@ -37,7 +37,7 @@ def build():
         "--clean",
         "--collect-all", "customtkinter",
         "--add-data", "assets;assets",
-        "--name", "AquaFlow_POS"
+        "--name", "Waterbank_POS"
     ]
     
     print(f"Running PyInstaller with arguments: {args}")
@@ -49,7 +49,7 @@ def build():
     print("Build complete!")
     print("The executable has been saved in the 'dist' directory:")
     dist_dir = os.path.join(project_root, "dist")
-    print(f"Target location: {dist_dir}\\AquaFlow_POS.exe")
+    print(f"Target location: {dist_dir}\\Waterbank_POS.exe")
     print("-------------------------------------------")
 
 if __name__ == "__main__":

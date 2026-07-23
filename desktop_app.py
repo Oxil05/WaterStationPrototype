@@ -52,7 +52,7 @@ class WaterStationApp(ctk.CTk):
     def __init__(self):
         super().__init__()
         
-        self.title("AquaFlow - Mineral Water Station POS & AI Console")
+        self.title("Waterbank - Mineral Water Station POS & AI Console")
         self.geometry("1100x680")
         self.minsize(1050, 650)
         self.configure(fg_color="#090d16")
@@ -129,7 +129,7 @@ class WaterStationApp(ctk.CTk):
             overlay.place(relx=0.5, rely=0.8, anchor="center", relwidth=0.85)
             
             title_lbl = ctk.CTkLabel(
-                overlay, text="AquaFlow Control", 
+                overlay, text="Waterbank Control", 
                 font=ctk.CTkFont(family="Outfit", size=20, weight="bold"), 
                 text_color="#06b6d4"
             )
@@ -143,7 +143,7 @@ class WaterStationApp(ctk.CTk):
         else:
             # Fallback if graphic fails to load
             fallback_label = ctk.CTkLabel(
-                left_pane, text="💦 AquaFlow", 
+                left_pane, text="💦 Waterbank", 
                 font=ctk.CTkFont(family="Outfit", size=32, weight="bold"), 
                 text_color="#3b82f6"
             )
@@ -166,7 +166,7 @@ class WaterStationApp(ctk.CTk):
             logo_lbl.pack(pady=(25, 5))
             
         brand_lbl = ctk.CTkLabel(
-            form_container, text="AQUAFLOW STATION", 
+            form_container, text="WATERBANK STATION", 
             font=ctk.CTkFont(family="Outfit", size=18, weight="bold"), 
             text_color="white"
         )
@@ -285,7 +285,7 @@ class WaterStationApp(ctk.CTk):
         # Brand title
         self.brand_label = ctk.CTkLabel(
             self.sidebar_frame, 
-            text="AquaFlow POS", 
+            text="Waterbank POS", 
             font=ctk.CTkFont(family="Outfit", size=20, weight="bold")
         )
         self.brand_label.grid(row=0, column=0, padx=20, pady=(20, 4))
@@ -1452,7 +1452,7 @@ class WaterStationApp(ctk.CTk):
             try:
                 with open(filepath, "w", newline="", encoding="utf-8") as f:
                     writer = csv.writer(f)
-                    writer.writerow(["AquaFlow Mineral Water Station - Financial Sales Report"])
+                    writer.writerow(["Waterbank Mineral Water Station - Financial Sales Report"])
                     writer.writerow(["Report Filter Range", range_val])
                     writer.writerow(["Generated At", datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
                     writer.writerow([])
@@ -1523,7 +1523,7 @@ class WaterStationApp(ctk.CTk):
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AquaFlow Sales Report - {range_val}</title>
+    <title>Waterbank Sales Report - {range_val}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1776,7 +1776,7 @@ class WaterStationApp(ctk.CTk):
         <div class="header">
             <div class="brand">
                 <span class="brand-icon">💧</span>
-                <div class="brand-text">AquaFlow Station</div>
+                <div class="brand-text">Waterbank Station</div>
             </div>
             <div class="report-meta">
                 <h1 class="report-title">Financial Sales Report</h1>
@@ -1825,7 +1825,7 @@ class WaterStationApp(ctk.CTk):
         <div class="footer">
             <div>
                 <p>Location: Bancal, Meycauayan, Bulacan</p>
-                <p style="font-size:0.75rem; margin-top:4px;">Document generated securely via AquaFlow POS Engine.</p>
+                <p style="font-size:0.75rem; margin-top:4px;">Document generated securely via Waterbank POS Engine.</p>
             </div>
             <div>
                 <div class="signature-line">

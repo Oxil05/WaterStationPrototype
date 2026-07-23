@@ -1,4 +1,4 @@
-# AquaFlow Water Station Management System
+# Waterbank Water Station Management System
 
 A unified Water Refill Station Point of Sale (POS) and Customer Order Web Portal. Built with Flask (Web Backend), CustomTkinter (Desktop GUI), and SQLite.
 
@@ -75,7 +75,7 @@ python desktop_app.py
 Launch the precompiled Windows application directly:
 ```bash
 # Double-click the file in File Explorer or run:
-.\dist\AquaFlow_POS.exe
+.\dist\Waterbank_POS.exe
 ```
 
 *   **Operator Login**: Username: `admin` | Password: `admin123`

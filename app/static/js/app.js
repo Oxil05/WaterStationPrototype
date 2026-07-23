@@ -1,4 +1,4 @@
-// AquaFlow - Main Application JavaScript
+// Waterbank - Main Application JavaScript
 
 document.addEventListener('DOMContentLoaded', function() {
     // Auto-dismiss flash messages after 5 seconds

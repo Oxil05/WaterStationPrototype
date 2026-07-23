@@ -37,7 +37,7 @@ def get_weather_forecast():
     try:
         req = urllib.request.Request(
             url, 
-            headers={'User-Agent': 'Mozilla/5.0 (AquaFlow Water Station Predictor)'}
+            headers={'User-Agent': 'Mozilla/5.0 (Waterbank Water Station Predictor)'}
         )
         with urllib.request.urlopen(req, timeout=5) as response:
             data = json.loads(response.read().decode('utf-8'))
